@@ -20,12 +20,11 @@ namespace Board
             public BoardCoordinate Coordinate { get; set; }
             public Cell Cell;
 
-            // TODO: add some information here
-            // Is there anything occupied here?
-
             public BoardObjectType? BoardObjectType { get; set; }
 
             public bool IsOccupied => BoardObjectType is not null;
+
+            // TODO: add some information here
         }
     }
 }

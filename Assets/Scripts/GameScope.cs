@@ -24,7 +24,7 @@ public class GameScope : LifetimeScope
 
         builder.RegisterInstance(gameSetting.BoardSetting);
         // would be better to let the board manager be it's own container, but haven't got enough time to research  
-        builder.RegisterInstance(boardManager);
+        builder.RegisterComponent(boardManager);
         builder.RegisterInstance(camera);
     }
 
@@ -35,5 +35,9 @@ public class GameScope : LifetimeScope
         Debug.Log($"{nameof(GameScope)} Start gameManager({gameManager.GetHashCode()})");
 
         Container.Resolve<PlayerInputManager>();
+
+        // var boardSetting =  Container.Resolve<BoardSetting>();
+        // var boardManager =  Container.Resolve<BoardManager>();
+        // boardManager.SetBoardSetting(boardSetting);
     }
 }

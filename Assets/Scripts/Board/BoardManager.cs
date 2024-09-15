@@ -14,23 +14,60 @@ namespace Board
         , IDisposable
     {
         [SerializeField] private Cell _cellPrefab = null!;
+        [SerializeField] private Transform cellParent = null!;
         [SerializeField] private Transform boardPositionReference = null!;
 
-        [Inject] private readonly BoardSetting _boardSetting = null!;
+        [Inject] private BoardSetting _boardSetting = null!;
 
-        // consider changing into IReadonlyDictionary
-        Dictionary<BoardCoordinate, CellData>? cellDataMap = null;
+        IReadOnlyDictionary<BoardCoordinate, CellData>? cellDataMap = null;
 
         public void SetupBoard()
         {
             Debug.Log($"{nameof(BoardManager)} SetupBoard");
-            // TODO: implement 
 
-            cellDataMap = new Dictionary<BoardCoordinate, CellData>();
-            foreach (uint x in Enumerable.Range(0, (int)_boardSetting.BoardWidth))
+            if (_boardSetting == null) throw new NullReferenceException(nameof(_boardSetting));
+
+            // create cells and populate the map
+            var newCellDataMap = new Dictionary<BoardCoordinate, CellData>();
+            foreach (int x in Enumerable.Range(0, (int)_boardSetting.BoardWidth))
             {
-                foreach (uint y in Enumerable.Range(0, (int)_boardSetting.BoardHeight))
+                foreach (int y in Enumerable.Range(0, (int)_boardSetting.BoardHeight))
                 {
+                    var coordinate = new BoardCoordinate(x, y);
+                    var newCell = Instantiate(_cellPrefab, parent: cellParent);
+                    newCell.name = coordinate.ToString();
+                    var newCellData = new CellData()
+                    {
+                        Coordinate = coordinate,
+                        Cell = newCell,
+                    };
+                    newCellDataMap.Add(coordinate, newCellData);
+                }
+            }
+
+            cellDataMap = newCellDataMap;
+
+            // set positions of the cells
+            {
+                Vector3 basePosition = new Vector3(0, 0, 0);
+                Vector2 cellSize = _cellPrefab.SpriteRenderer.size;
+                Debug.Log($"{nameof(cellSize)}({cellSize})");
+                foreach (int x in Enumerable.Range(0, (int)_boardSetting.BoardWidth))
+                {
+                    foreach (int y in Enumerable.Range(0, (int)_boardSetting.BoardHeight))
+                    {
+                        var coordinate = new BoardCoordinate(x, y);
+                        var cell = cellDataMap[coordinate].Cell;
+
+                        var newPosition = new Vector3(
+                            basePosition.x + cellSize.x * x,
+                            basePosition.y + cellSize.y * y,
+                            0
+                        );
+                        cell.transform
+                            .SetLocalPositionAndRotation(newPosition, Quaternion.identity);
+                        // Debug.Log($"cell({cell.name}) position({newPosition})", cell);
+                    }
                 }
             }
         }

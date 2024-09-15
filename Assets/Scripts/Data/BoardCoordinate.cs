@@ -7,6 +7,12 @@ namespace Data
         public int X;
         public int Y;
         
+        public BoardCoordinate(int x, int y) : this()
+        {
+            this.X = x;
+            this.Y = y;
+        }
+        
         public BoardCoordinate GetNeighbor(Direction direction)
         {
             return direction switch
@@ -18,5 +24,7 @@ namespace Data
                 _ => throw new ArgumentOutOfRangeException(nameof(direction), direction, null)
             };
         }
+
+        public override string ToString() => $"({X}, {Y})";
     }
 }
