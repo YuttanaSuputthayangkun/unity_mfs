@@ -9,7 +9,10 @@ namespace Settings
     public class GameSetting : ScriptableObject
     {
         [SerializeField] private BoardSetting boardSetting = null!;
+        [SerializeField] private CharacterSpawnSetting characterSpawnSetting = null!;
 
         public BoardSetting BoardSetting => boardSetting;
+
+        public CharacterSpawnSetting SpawnSetting => characterSpawnSetting;
     }
 }
