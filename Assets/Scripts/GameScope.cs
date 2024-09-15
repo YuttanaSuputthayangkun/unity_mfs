@@ -1,7 +1,9 @@
+using Board;
 using Input;
 using Settings;
 using State.Game;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VContainer;
 using VContainer.Unity;
 
@@ -10,6 +12,8 @@ using VContainer.Unity;
 public class GameScope : LifetimeScope
 {
     [SerializeField] private GameSetting gameSetting = null!;
+    [SerializeField] private BoardManager boardManager = null!;
+    [SerializeField] private Camera camera = null!;
 
     protected override void Configure(IContainerBuilder builder)
     {
@@ -19,6 +23,9 @@ public class GameScope : LifetimeScope
         builder.Register<PlayerInputManager>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
 
         builder.RegisterInstance(gameSetting.BoardSetting);
+        // would be better to let the board manager be it's own container, but haven't got enough time to research  
+        builder.RegisterInstance(boardManager);
+        builder.RegisterInstance(camera);
     }
 
     private void Start()
