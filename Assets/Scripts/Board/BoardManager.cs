@@ -4,20 +4,23 @@ using System.Linq;
 using Data;
 using Settings;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VContainer;
+using VContainer.Unity;
 
 #nullable enable
 
 namespace Board
 {
     public partial class BoardManager : MonoBehaviour
+        , IInitializable
         , IDisposable
     {
-        [SerializeField] private Cell _cellPrefab = null!;
-        [SerializeField] private Transform cellParent = null!;
-        [SerializeField] private Transform boardPositionReference = null!;
+        [FormerlySerializedAs("_cellPrefab")] [SerializeField]
+        private CellComponent cellComponentPrefab = null!;
 
         [Inject] private BoardSetting _boardSetting = null!;
+        [Inject] private LifetimeScope _lifetimeScope = null!;
 
         IReadOnlyDictionary<BoardCoordinate, CellData>? cellDataMap = null;
 
@@ -28,29 +31,32 @@ namespace Board
             if (_boardSetting == null) throw new NullReferenceException(nameof(_boardSetting));
 
             // create cells and populate the map
-            var newCellDataMap = new Dictionary<BoardCoordinate, CellData>();
-            foreach (int x in Enumerable.Range(0, _boardSetting.BoardWidth))
+            using (LifetimeScope.EnqueueParent(_lifetimeScope))
             {
-                foreach (int y in Enumerable.Range(0, _boardSetting.BoardHeight))
+                var newCellDataMap = new Dictionary<BoardCoordinate, CellData>();
+                foreach (int x in Enumerable.Range(0, _boardSetting.BoardWidth))
                 {
-                    var coordinate = new BoardCoordinate(x, y);
-                    var newCell = Instantiate(_cellPrefab, parent: cellParent);
-                    newCell.name = coordinate.ToString();
-                    var newCellData = new CellData
+                    foreach (int y in Enumerable.Range(0, _boardSetting.BoardHeight))
                     {
-                        Coordinate = coordinate,
-                        Cell = newCell,
-                    };
-                    newCellDataMap.Add(coordinate, newCellData);
+                        var coordinate = new BoardCoordinate(x, y);
+                        var newCell = _lifetimeScope.Container.Resolve<Cell>();
+                        newCell.SetName(coordinate.ToString());
+                        var newCellData = new CellData
+                        {
+                            Coordinate = coordinate,
+                            Cell = newCell,
+                        };
+                        newCellDataMap.Add(coordinate, newCellData);
+                    }
                 }
-            }
 
-            cellDataMap = newCellDataMap;
+                cellDataMap = newCellDataMap;
+            }
 
             // set positions of the cells
             {
                 Vector3 basePosition = new Vector3(0, 0, 0);
-                Vector2 cellSize = _cellPrefab.SpriteRenderer.size;
+                Vector2 cellSize = cellComponentPrefab.SpriteRenderer.size;
                 // Debug.Log($"{nameof(cellSize)}({cellSize})");
                 foreach (int x in Enumerable.Range(0, _boardSetting.BoardWidth))
                 {
@@ -64,8 +70,7 @@ namespace Board
                             basePosition.y - cellSize.y * y,
                             0
                         );
-                        cell.transform
-                            .SetLocalPositionAndRotation(newPosition, Quaternion.identity);
+                        cell.SetPosition(newPosition);
                         // Debug.Log($"cell({cell.name}) position({newPosition})", cell);
                     }
                 }
@@ -77,13 +82,18 @@ namespace Board
 
             var result = new SetupBoardResult
             {
-                BoardPosition = (bottomRightCell.transform.position - topLeftCell.transform.position) / 2,
+                BoardPosition = (bottomRightCell.Position - topLeftCell.Position) / 2,
                 BoardSize = new Vector2(
-                    _cellPrefab.SpriteRenderer.size.x * _boardSetting.BoardWidth,
-                    _cellPrefab.SpriteRenderer.size.y * _boardSetting.BoardHeight
+                    cellComponentPrefab.SpriteRenderer.size.x * _boardSetting.BoardWidth,
+                    cellComponentPrefab.SpriteRenderer.size.y * _boardSetting.BoardHeight
                 )
             };
             return result;
+        }
+
+        void IInitializable.Initialize()
+        {
+            throw new NotImplementedException();
         }
 
         void IDisposable.Dispose()
