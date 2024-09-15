@@ -40,12 +40,16 @@ namespace Input
         public async UniTask<Direction> WaitDirectionalInputAsync(
             CancellationToken cancellationToken = new CancellationToken())
         {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            var innerCancellationToken = cts.Token;
             var tasks = directionalInputs
                 .Select(x =>
-                    UniTask.WaitUntil(() => IsPressed(x.inputType), PlayerLoopTiming.Update, cancellationToken))
+                    UniTask.WaitUntil(() => IsPressed(x.inputType), PlayerLoopTiming.Update, innerCancellationToken))
                 .ToArray();
             int finishedIndex = await UniTask.WhenAny(tasks);
-            return directionalInputs[finishedIndex].direction;
+            var output = directionalInputs[finishedIndex].direction;
+            cts.Cancel();   // cancel after getting the result to end the local tasks
+            return output;
         }
 
         private InputAction GetInputAction(InputType inputType) =>
