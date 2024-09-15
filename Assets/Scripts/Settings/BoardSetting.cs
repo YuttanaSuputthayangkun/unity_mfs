@@ -7,11 +7,11 @@ namespace Settings
     [CreateAssetMenu(fileName = nameof(BoardSetting), menuName = "Settings/" + nameof(BoardSetting))]
     public class BoardSetting : ScriptableObject
     {
-        [SerializeField] private uint boardHeight;
-        [SerializeField] private uint boardWidth;
+        [Range(0, 100)] [SerializeField] private int boardHeight;
+        [Range(0, 100)] [SerializeField] private int boardWidth;
 
-        public uint BoardHeight => boardHeight;
+        public int BoardHeight => boardHeight;
 
-        public uint BoardWidth => boardWidth;
+        public int BoardWidth => boardWidth;
     }
 }

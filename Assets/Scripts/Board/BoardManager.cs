@@ -21,7 +21,7 @@ namespace Board
 
         IReadOnlyDictionary<BoardCoordinate, CellData>? cellDataMap = null;
 
-        public void SetupBoard()
+        public SetupBoardResult SetupBoard()
         {
             Debug.Log($"{nameof(BoardManager)} SetupBoard");
 
@@ -29,14 +29,14 @@ namespace Board
 
             // create cells and populate the map
             var newCellDataMap = new Dictionary<BoardCoordinate, CellData>();
-            foreach (int x in Enumerable.Range(0, (int)_boardSetting.BoardWidth))
+            foreach (int x in Enumerable.Range(0, _boardSetting.BoardWidth))
             {
-                foreach (int y in Enumerable.Range(0, (int)_boardSetting.BoardHeight))
+                foreach (int y in Enumerable.Range(0, _boardSetting.BoardHeight))
                 {
                     var coordinate = new BoardCoordinate(x, y);
                     var newCell = Instantiate(_cellPrefab, parent: cellParent);
                     newCell.name = coordinate.ToString();
-                    var newCellData = new CellData()
+                    var newCellData = new CellData
                     {
                         Coordinate = coordinate,
                         Cell = newCell,
@@ -51,17 +51,17 @@ namespace Board
             {
                 Vector3 basePosition = new Vector3(0, 0, 0);
                 Vector2 cellSize = _cellPrefab.SpriteRenderer.size;
-                Debug.Log($"{nameof(cellSize)}({cellSize})");
-                foreach (int x in Enumerable.Range(0, (int)_boardSetting.BoardWidth))
+                // Debug.Log($"{nameof(cellSize)}({cellSize})");
+                foreach (int x in Enumerable.Range(0, _boardSetting.BoardWidth))
                 {
-                    foreach (int y in Enumerable.Range(0, (int)_boardSetting.BoardHeight))
+                    foreach (int y in Enumerable.Range(0, _boardSetting.BoardHeight))
                     {
                         var coordinate = new BoardCoordinate(x, y);
                         var cell = cellDataMap[coordinate].Cell;
 
                         var newPosition = new Vector3(
                             basePosition.x + cellSize.x * x,
-                            basePosition.y + cellSize.y * y,
+                            basePosition.y - cellSize.y * y,
                             0
                         );
                         cell.transform
@@ -70,6 +70,20 @@ namespace Board
                     }
                 }
             }
+
+            var topLeftCell = cellDataMap[(0, 0)].Cell;
+            var bottomRightCell =
+                cellDataMap[(_boardSetting.BoardHeight - 1, _boardSetting.BoardWidth - 1)].Cell;
+
+            var result = new SetupBoardResult
+            {
+                BoardPosition = (bottomRightCell.transform.position - topLeftCell.transform.position) / 2,
+                BoardSize = new Vector2(
+                    _cellPrefab.SpriteRenderer.size.x * _boardSetting.BoardWidth,
+                    _cellPrefab.SpriteRenderer.size.y * _boardSetting.BoardHeight
+                )
+            };
+            return result;
         }
 
         void IDisposable.Dispose()

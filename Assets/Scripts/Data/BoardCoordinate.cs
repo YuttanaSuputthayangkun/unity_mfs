@@ -26,5 +26,7 @@ namespace Data
         }
 
         public override string ToString() => $"({X}, {Y})";
+        
+        public static implicit operator BoardCoordinate((int x, int y) coordinate) => new(coordinate.x,coordinate.y);
     }
 }

@@ -2,6 +2,7 @@ using System.Threading;
 using Board;
 using Cysharp.Threading.Tasks;
 using Input;
+using Unity.Mathematics;
 using UnityEngine;
 using VContainer.Unity;
 
@@ -26,8 +27,8 @@ namespace State.Game
 
         async UniTask IAsyncStartable.StartAsync(CancellationToken cancellation)
         {
-            SetupScene(); 
-            
+            SetupScene();
+
             await UniTask.Yield();
             Debug.Log($"{nameof(GameState)} StartAsync");
 
@@ -35,7 +36,7 @@ namespace State.Game
             while (true)
             {
                 cancellation.ThrowIfCancellationRequested();
-                
+
                 var direction = await _playerInputManager.WaitDirectionalInputAsync(cancellation);
                 Debug.Log($"{nameof(GameState)} StartAsync direction({direction})");
             }
@@ -43,7 +44,20 @@ namespace State.Game
 
         private void SetupScene()
         {
-            _boardManager.SetupBoard(); 
+            var setupBoardResult = _boardManager.SetupBoard();
+            // Debug.Log($"setupBoardResult({setupBoardResult})");
+            
+            // set camera in the middle of the board
+            _camera.transform.GetPositionAndRotation(out var originalPosition, out _);
+            var newCameraPosition = originalPosition;
+            newCameraPosition.x = setupBoardResult.BoardPosition.x;
+            newCameraPosition.y = setupBoardResult.BoardPosition.y;
+            _camera.transform.SetPositionAndRotation(newCameraPosition, Quaternion.identity);
+            
+            // set camera size to match with the board
+            var newOrthographicSize = Mathf.Max(setupBoardResult.BoardSize.x, setupBoardResult.BoardSize.y) / 2;
+            _camera.orthographicSize = newOrthographicSize;
+            // Debug.Log($"newOrthographicSize({newOrthographicSize})");
         }
     }
 }
