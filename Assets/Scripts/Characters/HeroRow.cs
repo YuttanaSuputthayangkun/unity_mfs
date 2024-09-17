@@ -25,7 +25,8 @@ namespace Characters
 
         private readonly Queue<RowHeroData> _characterQueue = new Queue<RowHeroData>();
 
-        public HeroRow(BoardManager boardManager, BoardSetting boardSetting, CharacterSpawner spawner, CharacterDataSetting characterDataSetting)
+        public HeroRow(BoardManager boardManager, BoardSetting boardSetting, CharacterSpawner spawner,
+            CharacterDataSetting characterDataSetting)
         {
             _boardManager = boardManager;
             _boardSetting = boardSetting;
@@ -46,8 +47,9 @@ namespace Characters
         {
             var boardCoordinate = _boardSetting.StartHeroCoordinate;
             var heroType = _boardSetting.StartHeroType;
-            var heroData = _characterDataSetting.HeroDataList.First() ?? throw new NotSupportedException($"No data of hero with type: {heroType}");
-            
+            var heroData = _characterDataSetting.HeroDataList.First(x => x.Type == heroType)
+                           ?? throw new NotSupportedException($"No data of hero with type: {heroType}");
+
             var getCellResult = _boardManager.GetCell(boardCoordinate);
             if (!getCellResult.IsFound)
             {
@@ -55,7 +57,7 @@ namespace Characters
             }
 
             // this pattern match also checks for null
-            if (getCellResult.CellData is { IsOccupied: true})
+            if (getCellResult.CellData is { IsOccupied: true })
             {
                 // TODO: use a proper exception type
                 throw new Exception($"SetupStartHero cell ({boardCoordinate}) is already occupied");
@@ -63,10 +65,10 @@ namespace Characters
 
             // spawn
             var spawnedHero = _spawner.SpawnHero(heroType);
-            
+
             // set position
             spawnedHero.SetWorldPosition(getCellResult.CellData!.WorldPosition);
-            
+
             // update board cell type
             _boardManager.SetCellObjectType(boardCoordinate, BoardObjectType.Hero);
 
@@ -78,7 +80,6 @@ namespace Characters
 
         public bool TryMove(Direction direction)
         {
-            throw new NotImplementedException();
         }
     }
 }
