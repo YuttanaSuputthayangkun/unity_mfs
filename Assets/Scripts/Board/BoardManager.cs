@@ -135,7 +135,7 @@ namespace Board
             return GetCell(randomCoordinate);
         }
 
-        public SetCellResult SetCellObjectType(BoardCoordinate boardCoordinate, BoardObjectType boardObjectType)
+        public SetCellResult SetCellObjectType(BoardCoordinate boardCoordinate, BoardObjectType? boardObjectType)
         {
             if (_cellDataMap is null || _emptyCellCoordinateList is null)
             {

@@ -71,8 +71,13 @@ namespace State.Game
                 var collisionProcessResult = ProcessCollision();
                 if (collisionProcessResult.HasCollision)
                 {
-                    SpawnCharacters();
+                    // heaven or hell? let's rock!
                 }
+
+                bool hasMoved = _heroRow.TryMove(direction);
+                Debug.Log($"{nameof(GameState)} hasMoved({hasMoved})");
+
+                SpawnCharacters();
             }
         }
 

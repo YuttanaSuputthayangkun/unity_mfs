@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Board;
 using System.Linq;
 using Data;
+using Extensions;
 using Settings;
 using UnityEngine;
 
@@ -35,6 +36,8 @@ namespace Characters
         }
 
         public IEnumerable<IReadOnlyRowHeroData> RowHeroDataList => _characterQueue;
+
+        private RowHeroData? Head => _characterQueue.Peek();
 
         public override string ToString()
         {
@@ -80,6 +83,66 @@ namespace Characters
 
         public bool TryMove(Direction direction)
         {
+            // check from head if the direction is movable 
+            var head = Head!;
+            var headCoordinate = head.Coordinate;
+            var nextHeadCoordinate = headCoordinate.GetNeighbor(direction);
+
+            var getCellResult = _boardManager.GetCell(nextHeadCoordinate);
+            if (getCellResult is { IsFound: true, CellData: { IsOccupied: false } })
+            {
+                // call direction, aside from the first one
+                var pairs = _characterQueue.ToPairsWithPreviousClass();
+                foreach (var (previousHero, hero) in pairs)
+                {
+                    if (previousHero is RowHeroData previous)
+                    {
+                        // means this is not the head of the row
+                        // move to previous hero's position
+                        var nextCoordinate = previous.Coordinate;
+                        if (!TryMoveHero(nextCoordinate, hero))
+                        {
+                            // TODO: use a proper exception type
+                            throw new Exception("this should not happen, following hero should always be able to move");
+                        }
+                    }
+                    else
+                    {
+                        // this is the head, go to next head coordinate
+                        if (!TryMoveHero(nextHeadCoordinate, hero))
+                        {
+                            // TODO: use a proper exception type
+                            throw new Exception("this should not happen, we've already checked head coordinate");
+                        }
+                    }
+                }
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private bool TryMoveHero(BoardCoordinate nextBoardCoordinate, RowHeroData rowHeroData)
+        {
+            var currentCoordinate = rowHeroData.Coordinate;
+            var getCellResult = _boardManager.GetCell(nextBoardCoordinate);
+            if (getCellResult is { IsFound: true, CellData: { IsOccupied: false, WorldPosition: var nextWorldPosition } })
+            {
+                _boardManager.SetCellObjectType(nextBoardCoordinate, rowHeroData.Hero.BoardObjectType);
+                rowHeroData.UpdateCoordinate(nextBoardCoordinate);
+                rowHeroData.Hero.SetWorldPosition(nextWorldPosition);
+
+                _boardManager.SetCellObjectType(currentCoordinate, null);
+                
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
