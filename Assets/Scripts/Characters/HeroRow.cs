@@ -39,7 +39,7 @@ namespace Characters
 
         public int HeroCount => _heroList.Count;
 
-        private IReadOnlyRowHeroData? First => _heroList.GetFirst();
+        public IReadOnlyRowHeroData? First => _heroList.GetFirst();
 
         public override string ToString() => _heroList.ToString();
 

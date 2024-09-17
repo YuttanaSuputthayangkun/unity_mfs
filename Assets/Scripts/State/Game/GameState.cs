@@ -3,6 +3,7 @@ using System.Threading;
 using Board;
 using Characters;
 using Cysharp.Threading.Tasks;
+using Data;
 using Input;
 using Settings;
 using UnityEngine;
@@ -66,7 +67,7 @@ namespace State.Game
                 var direction = await _playerInputManager.WaitDirectionalInputAsync(cancellation);
                 Debug.Log($"{nameof(GameState)} StartAsync direction({direction})");
 
-                var collisionProcessResult = CheckCollision();
+                var collisionProcessResult = CheckCollision(direction);
                 switch (collisionProcessResult.CollidedObject)
                 {
                     case Hero hero:
@@ -126,9 +127,18 @@ namespace State.Game
             _heroRow.SetupStartHero();
         }
 
-        private CollisionCheckResult CheckCollision()
+        private CollisionCheckResult CheckCollision(Direction direciton)
         {
-            // TODO: implement this
+            var headCoordinate = _heroRow.First!.Coordinate;
+            var nextCoordinate = headCoordinate.GetNeighbor(direciton);
+            var getCellResult = _boardManager.GetCell(nextCoordinate);
+            if (!getCellResult.IsFound)
+            {
+                // no collision, but won't be able to move anyway
+                return new CollisionCheckResult();
+            }
+            
+            
 
             return new CollisionCheckResult()
             {

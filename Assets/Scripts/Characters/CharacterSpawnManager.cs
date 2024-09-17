@@ -3,8 +3,8 @@ using System.Linq;
 using Board;
 using Characters.Interfaces;
 using Data;
-using Extensions;
 using Settings;
+using Utilities;
 
 #nullable enable
 
@@ -40,6 +40,12 @@ namespace Characters
         private readonly CharacterSpawnSetting _spawnSetting;
         private readonly CharacterSpawner _spawner;
         private readonly BoardManager _boardManager;
+
+        private WeightedRandom<int>? _weightedRandomSpawnCount;
+        private WeightedRandom<CharacterType>? _weightedRandomCharacterType;
+        private WeightedRandom<HeroType>? _weightedRandomHeroType;
+        private WeightedRandom<EnemyType>? _weightedRandomEnemyType;
+        private WeightedRandom<ObstacleType>? _weightedRandomObstacleType;
 
         public CharacterSpawnManager(
             CharacterSpawnSetting spawnSetting,
@@ -101,37 +107,46 @@ namespace Characters
 
         public int GetRandomSpawnCount()
         {
-            var data = _spawnSetting.CharacterCountDataList.RandomPickStruct() ??
-                       throw new NotSupportedException("spawn count is not set");
-            return data.Count;
+            _weightedRandomSpawnCount ??=
+                new WeightedRandom<int>(_spawnSetting.CharacterCountDataList.Select(x => (x.Count, x.weight)));
+
+            return _weightedRandomSpawnCount.GetRandomItem();
         }
 
         public CharacterType GetRandomCharacterType()
         {
-            var data = _spawnSetting.CharacterTypeDataList.RandomPickStruct() ??
-                       throw new NotSupportedException("spawn count is not set");
-            return data.characterType;
+            _weightedRandomCharacterType ??=
+                new WeightedRandom<CharacterType>(
+                    _spawnSetting.CharacterTypeDataList.Select(x => (x.characterType, x.weight)));
+
+            return _weightedRandomCharacterType.GetRandomItem();
         }
 
         public HeroType GetRandomHeroType()
         {
-            var data = _spawnSetting.HeroTypeDataList.RandomPickStruct() ??
-                       throw new NotSupportedException("spawn count is not set");
-            return data.heroType;
+            _weightedRandomHeroType ??=
+                new WeightedRandom<HeroType>(
+                    _spawnSetting.HeroTypeDataList.Select(x => (x.heroType, x.weight)));
+
+            return _weightedRandomHeroType.GetRandomItem();
         }
 
         public EnemyType GetRandomEnemyType()
         {
-            var data = _spawnSetting.EnemyTypeDataList.RandomPickStruct() ??
-                       throw new NotSupportedException("spawn count is not set");
-            return data.enemyType;
+            _weightedRandomEnemyType ??=
+                new WeightedRandom<EnemyType>(
+                    _spawnSetting.EnemyTypeDataList.Select(x => (x.enemyType, x.weight)));
+
+            return _weightedRandomEnemyType.GetRandomItem();
         }
 
         public ObstacleType GetRandomObstacleType()
         {
-            var data = _spawnSetting.ObstacleTypeDataList.RandomPickStruct() ??
-                       throw new NotSupportedException("spawn count is not set");
-            return data.obstacleType;
+            _weightedRandomObstacleType ??=
+                new WeightedRandom<ObstacleType>(
+                    _spawnSetting.ObstacleTypeDataList.Select(x => (x.obstacleType, x.weight)));
+
+            return _weightedRandomObstacleType.GetRandomItem();
         }
     }
 }
