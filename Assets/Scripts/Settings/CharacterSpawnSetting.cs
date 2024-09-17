@@ -1,5 +1,6 @@
 using System;
 using Characters;
+using Data;
 using UnityEngine;
 
 #nullable enable

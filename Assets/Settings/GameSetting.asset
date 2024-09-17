@@ -13,3 +13,6 @@ MonoBehaviour:
   m_Name: GameSetting
   m_EditorClassIdentifier: 
   boardSetting: {fileID: 11400000, guid: ecac843dd6d694640bdaf3012ab8da95, type: 2}
+  characterSpawnSetting: {fileID: 11400000, guid: 270af7de725a93d4786dfbb4acc748b1, type: 2}
+  characterPrefabSetting: {fileID: 11400000, guid: 8a14c90bf6105bf4eb6f45160e343e84, type: 2}
+  characterDataSetting: {fileID: 11400000, guid: 51c1f176dd3aa0946873c92d30bbfdab, type: 2}

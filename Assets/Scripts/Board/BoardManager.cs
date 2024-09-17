@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using VContainer;
 using VContainer.Unity;
+using Random = UnityEngine.Random;
 
 #nullable enable
 
@@ -22,7 +23,9 @@ namespace Board
         [Inject] private BoardSetting _boardSetting = null!;
         [Inject] private LifetimeScope _lifetimeScope = null!;
 
-        IReadOnlyDictionary<BoardCoordinate, CellData>? cellDataMap = null;
+        private IReadOnlyDictionary<BoardCoordinate, CellData>? _cellDataMap = null;
+        // to get random cells
+        private List<BoardCoordinate>? _emptyCellCoordinateList = null;
 
         public SetupBoardResult SetupBoard()
         {
@@ -50,8 +53,11 @@ namespace Board
                     }
                 }
 
-                cellDataMap = newCellDataMap;
+                _cellDataMap = newCellDataMap;
             }
+            
+            // every cells are empty cells
+            _emptyCellCoordinateList = _cellDataMap.Select(x => x.Key).ToList();
 
             // set positions of the cells
             {
@@ -63,7 +69,7 @@ namespace Board
                     foreach (int y in Enumerable.Range(0, _boardSetting.BoardHeight))
                     {
                         var coordinate = new BoardCoordinate(x, y);
-                        var cell = cellDataMap[coordinate].Cell;
+                        var cell = _cellDataMap[coordinate].Cell;
 
                         var newPosition = new Vector3(
                             basePosition.x + cellSize.x * x,
@@ -76,9 +82,10 @@ namespace Board
                 }
             }
 
-            var topLeftCell = cellDataMap[(0, 0)].Cell;
+            // produce setup result
+            var topLeftCell = _cellDataMap[(0, 0)].Cell;
             var bottomRightCell =
-                cellDataMap[(_boardSetting.BoardHeight - 1, _boardSetting.BoardWidth - 1)].Cell;
+                _cellDataMap[(_boardSetting.BoardHeight - 1, _boardSetting.BoardWidth - 1)].Cell;
 
             var result = new SetupBoardResult
             {
@@ -99,22 +106,34 @@ namespace Board
         void IDisposable.Dispose()
         {
             // TODO: consider cleanup the cells if necessary
-            cellDataMap = null;
+            _cellDataMap = null;
         }
 
         public GetCellResult GetCell(BoardCoordinate coordinate)
         {
-            if (cellDataMap is null)
+            if (_cellDataMap is null)
             {
                 throw new NullReferenceException($"Please call {nameof(SetupBoard)}.");
             }
 
-            if (!cellDataMap.TryGetValue(coordinate, out var cellData))
+            if (!_cellDataMap.TryGetValue(coordinate, out var cellData))
             {
                 return new GetCellResult() { ResultType = GetCellResultType.OutOfBound };
             }
 
             return new GetCellResult() { ResultType = GetCellResultType.Found, CellData = cellData };
+        }
+
+        public GetCellResult GetRandomEmptyCell()
+        {
+            if (_cellDataMap is null || _emptyCellCoordinateList is null)
+            {
+                throw new NullReferenceException($"Please call {nameof(SetupBoard)}.");
+            }
+
+            int randomEmptyCellIndex = Random.Range(0, _emptyCellCoordinateList.Count - 1);
+            var randomCoordinate = _emptyCellCoordinateList[randomEmptyCellIndex];
+            return GetCell(randomCoordinate);
         }
     }
 }

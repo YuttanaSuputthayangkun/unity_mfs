@@ -1,6 +1,4 @@
-using UnityEngine;
-
-namespace Characters
+namespace Data
 {
     public enum CharacterType
     {

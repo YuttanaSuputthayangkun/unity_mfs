@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 
 #nullable enable
 
@@ -10,9 +9,15 @@ namespace Settings
     {
         [SerializeField] private BoardSetting boardSetting = null!;
         [SerializeField] private CharacterSpawnSetting characterSpawnSetting = null!;
+        [SerializeField] private CharacterPrefabSetting characterPrefabSetting = null!;
+        [SerializeField] private CharacterDataSetting characterDataSetting = null!;
 
         public BoardSetting BoardSetting => boardSetting;
 
         public CharacterSpawnSetting SpawnSetting => characterSpawnSetting;
+
+        public CharacterPrefabSetting PrefabSetting => characterPrefabSetting;
+
+        public CharacterDataSetting DataSetting => characterDataSetting;
     }
 }

@@ -9,12 +9,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9508408967c859b45814d6b23354f90d, type: 3}
-  m_Name: CharacterSpawnSetting
+  m_Script: {fileID: 11500000, guid: dafeb05644ed0134cbca1f9ec7ad6d73, type: 3}
+  m_Name: CharacterDataSetting
   m_EditorClassIdentifier: 
-  characterTypeSpawningDataList:
+  heroDataList:
   - characterType: 0
-    weight: 1
-  heroSpawningChanceDataList:
-  - heroType: 0
-    weight: 1
+    stats:
+      health: 5
+      attack: 5
+      defense: 5
+  enemyDataList:
+  - characterType: 0
+    stats:
+      health: 2
+      attack: 2
+      defense: 2
+  obstacleDataList: []

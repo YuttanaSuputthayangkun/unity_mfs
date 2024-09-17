@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4a5cba86ebe35e4db831bf08bbbffb6, type: 3}
+  m_Name: CharacterPrefabSetting
+  m_EditorClassIdentifier: 
+  heroPrefabDataList:
+  - PrefabType: 0
+    Prefab: {fileID: 6520552930564917913, guid: b4021dd23ec3d9945879cb868ee7e433, type: 3}
+  enemyPrefabDataList:
+  - PrefabType: 0
+    Prefab: {fileID: 542342183893618889, guid: 3180e66cd0ee40e47aae14404f539072, type: 3}
+  obstaclePrefabDataList:
+  - PrefabType: 0
+    Prefab: {fileID: 628749876637259125, guid: 78b09f172f193d341945a976e6e71bcd, type: 3}
