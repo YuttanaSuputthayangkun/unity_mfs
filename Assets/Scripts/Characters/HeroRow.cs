@@ -61,14 +61,16 @@ namespace Characters
                 throw new Exception($"SetupStartHero cell ({boardCoordinate}) is already occupied");
             }
 
-            // TODO: set type
-            _boardManager.SetCellObjectType(boardCoordinate, BoardObjectType.Hero);
-            
-            // TODO: create hero and set position            
+            // spawn
             var spawnedHero = _spawner.SpawnHero(heroType);
-            // Debug.Log($"spawnedHero({spawned.GetHashCode()})");
+            
+            // set position
             spawnedHero.SetWorldPosition(getCellResult.CellData!.WorldPosition);
+            
+            // update board cell type
+            _boardManager.SetCellObjectType(boardCoordinate, BoardObjectType.Hero);
 
+            // store line information
             var newHeroData = new HeroData(heroData);
             var newRowData = new RowHeroData(boardCoordinate, newHeroData, spawnedHero);
             _characterQueue.Enqueue(newRowData);
