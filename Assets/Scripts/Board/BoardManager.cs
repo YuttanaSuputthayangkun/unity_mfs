@@ -17,9 +17,6 @@ namespace Board
         , IInitializable
         , IDisposable
     {
-        [FormerlySerializedAs("_cellPrefab")] [SerializeField]
-        private CellComponent cellComponentPrefab = null!;
-
         [Inject] private BoardSetting _boardSetting = null!;
         [Inject] private LifetimeScope _lifetimeScope = null!;
 
@@ -32,6 +29,8 @@ namespace Board
             Debug.Log($"{nameof(BoardManager)} SetupBoard");
 
             if (_boardSetting == null) throw new NullReferenceException(nameof(_boardSetting));
+
+            var cellComponentPrefab = _boardSetting.CellComponentPrefab;
 
             // create cells and populate the map
             using (LifetimeScope.EnqueueParent(_lifetimeScope))

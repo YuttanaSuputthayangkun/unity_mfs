@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boardHeight: 16
   boardWidth: 16
+  cellComponentPrefab: {fileID: 9058011704400321299, guid: f54a2f055a53bf946a5171e7c791362e, type: 3}

@@ -1,5 +1,6 @@
 #nullable enable
 
+using Board;
 using UnityEngine;
 
 namespace Settings
@@ -9,9 +10,12 @@ namespace Settings
     {
         [Range(0, 100)] [SerializeField] private int boardHeight;
         [Range(0, 100)] [SerializeField] private int boardWidth;
+        [SerializeField] private CellComponent cellComponentPrefab = null!;
 
         public int BoardHeight => boardHeight;
 
         public int BoardWidth => boardWidth;
+
+        public CellComponent CellComponentPrefab => cellComponentPrefab;
     }
 }

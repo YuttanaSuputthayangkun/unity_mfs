@@ -26,6 +26,7 @@ public class GameScope : LifetimeScope
         builder.Register<GameManager>(Lifetime.Singleton);
         builder.Register<GameState>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
         builder.Register<PlayerInputManager>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
+        builder.Register<CharacterSpawner>(Lifetime.Singleton);
 
         builder.RegisterInstance(gameCamera);
 
@@ -46,14 +47,5 @@ public class GameScope : LifetimeScope
         var gameManager =
             Container.Resolve<GameManager>(); // immediately resolve, just to test of a game manager is created
         Debug.Log($"{nameof(GameScope)} Start gameManager({gameManager.GetHashCode()})");
-
-        Container.Resolve<PlayerInputManager>();
-
-        // var boardSetting =  Container.Resolve<BoardSetting>();
-        // var boardManager =  Container.Resolve<BoardManager>();
-        // boardManager.SetBoardSetting(boardSetting);
-
-        _testCharacterData.Add(Container.Resolve<CharacterStats>());
-        _testCharacterData.Add(Container.Resolve<CharacterStats>());
     }
 }
