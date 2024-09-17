@@ -1,7 +1,7 @@
+using System.Collections.Generic;
 using Characters;
 using Data;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Settings
 {
@@ -12,8 +12,14 @@ namespace Settings
         [System.Serializable]
         public class PrefabData<TType>
         {
-            public TType PrefabType;
-            public GameObject Prefab;
+            [SerializeField]
+            private TType prefabType;
+            [SerializeField]
+            private GameObject prefab;
+            
+            public TType PrefabType => prefabType;
+
+            public GameObject Prefab => prefab;
         }
 
         [System.Serializable]
@@ -35,10 +41,10 @@ namespace Settings
         [SerializeField] private EnemyPrefabData[] enemyPrefabDataList;
         [SerializeField] private ObstaclePrefabData[] obstaclePrefabDataList;
 
-        public HeroPrefabData[] HeroPrefabDataList => heroPrefabDataList;
+        public IReadOnlyList<HeroPrefabData> HeroPrefabDataList => heroPrefabDataList;
 
-        public EnemyPrefabData[] EnemyPrefabDataList => enemyPrefabDataList;
+        public IReadOnlyList<EnemyPrefabData> EnemyPrefabDataList => enemyPrefabDataList;
 
-        public ObstaclePrefabData[] ObstaclePrefabDataList => obstaclePrefabDataList;
+        public IReadOnlyList<ObstaclePrefabData> ObstaclePrefabDataList => obstaclePrefabDataList;
     }
 }

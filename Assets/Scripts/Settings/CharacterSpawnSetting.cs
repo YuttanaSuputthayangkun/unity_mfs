@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Characters;
 using Data;
 using UnityEngine;
@@ -27,8 +28,8 @@ namespace Settings
         [SerializeField] private CharacterTypeSpawningData[] characterTypeSpawningDataList = null!;
         [SerializeField] private HeroSpawningChanceData[] heroSpawningChanceDataList = null!;
 
-        public CharacterTypeSpawningData[] CharacterTypeSpawningDataList => characterTypeSpawningDataList;
+        public IReadOnlyList<CharacterTypeSpawningData> CharacterTypeSpawningDataList => characterTypeSpawningDataList;
 
-        public HeroSpawningChanceData[] HeroSpawningChanceDataList => heroSpawningChanceDataList;
+        public IReadOnlyList<HeroSpawningChanceData> HeroSpawningChanceDataList => heroSpawningChanceDataList;
     }
 }

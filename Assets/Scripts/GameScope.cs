@@ -6,7 +6,6 @@ using Input;
 using Settings;
 using State.Game;
 using UnityEngine;
-using UnityEngine.Serialization;
 using VContainer;
 using VContainer.Unity;
 
@@ -15,7 +14,6 @@ using VContainer.Unity;
 public class GameScope : LifetimeScope
 {
     [SerializeField] private GameSetting gameSetting = null!;
-    [FormerlySerializedAs("heroPrefab")] [SerializeField] private HeroComponent heroComponentPrefab = null!;
     [SerializeField] private CellComponent cellPrefab = null!;
     [SerializeField] private BoardManager boardManager = null!;
     [SerializeField] private Camera gameCamera = null!;
@@ -28,7 +26,7 @@ public class GameScope : LifetimeScope
         builder.Register<GameManager>(Lifetime.Singleton);
         builder.Register<GameState>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
         builder.Register<PlayerInputManager>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
-        
+
         builder.RegisterInstance(gameCamera);
 
         // register board
@@ -38,9 +36,9 @@ public class GameScope : LifetimeScope
         builder.RegisterComponentInNewPrefab(cellPrefab, Lifetime.Transient);
         builder.Register<Board.Cell>(Lifetime.Transient).AsSelf();
 
-        // remove this after testing
-        builder.RegisterComponentInNewPrefab(heroComponentPrefab, Lifetime.Transient);
-        builder.Register<CharacterStats>(Lifetime.Transient);
+        builder.RegisterInstance(gameSetting.SpawnSetting);
+        builder.RegisterInstance(gameSetting.PrefabSetting);
+        builder.RegisterInstance(gameSetting.DataSetting);
     }
 
     private void Start()
