@@ -4,7 +4,6 @@ using System.Linq;
 using Data;
 using Settings;
 using UnityEngine;
-using UnityEngine.Serialization;
 using VContainer;
 using VContainer.Unity;
 using Random = UnityEngine.Random;
@@ -20,7 +19,8 @@ namespace Board
         [Inject] private BoardSetting _boardSetting = null!;
         [Inject] private LifetimeScope _lifetimeScope = null!;
 
-        private IReadOnlyDictionary<BoardCoordinate, CellData>? _cellDataMap = null;
+        private IDictionary<BoardCoordinate, CellData>? _cellDataMap = null;
+
         // to get random cells
         private List<BoardCoordinate>? _emptyCellCoordinateList = null;
 
@@ -54,7 +54,7 @@ namespace Board
 
                 _cellDataMap = newCellDataMap;
             }
-            
+
             // every cells are empty cells
             _emptyCellCoordinateList = _cellDataMap.Select(x => x.Key).ToList();
 
@@ -75,7 +75,7 @@ namespace Board
                             basePosition.y - cellSize.y * y,
                             0
                         );
-                        cell.SetPosition(newPosition);
+                        cell!.SetPosition(newPosition);
                         // Debug.Log($"cell({cell.name}) position({newPosition})", cell);
                     }
                 }
@@ -88,7 +88,7 @@ namespace Board
 
             var result = new SetupBoardResult
             {
-                BoardPosition = (bottomRightCell.Position - topLeftCell.Position) / 2,
+                BoardPosition = (bottomRightCell!.Position - topLeftCell!.Position) / 2,
                 BoardSize = new Vector2(
                     cellComponentPrefab.SpriteRenderer.size.x * _boardSetting.BoardWidth,
                     cellComponentPrefab.SpriteRenderer.size.y * _boardSetting.BoardHeight
@@ -133,6 +133,24 @@ namespace Board
             int randomEmptyCellIndex = Random.Range(0, _emptyCellCoordinateList.Count - 1);
             var randomCoordinate = _emptyCellCoordinateList[randomEmptyCellIndex];
             return GetCell(randomCoordinate);
+        }
+
+        public SetCellResult SetCellObjectType(BoardCoordinate boardCoordinate, BoardObjectType boardObjectType)
+        {
+            if (_cellDataMap is null || _emptyCellCoordinateList is null)
+            {
+                throw new NullReferenceException($"Please call {nameof(SetupBoard)}.");
+            }
+
+            var getResult = GetCell(boardCoordinate);
+            if (getResult is { ResultType: GetCellResultType.OutOfBound })
+            {
+                return new SetCellResult() { ResultType = SetCellResultType.OutOfBound };
+            }
+
+            _cellDataMap[boardCoordinate].BoardObjectType = boardObjectType;
+            
+            return new SetCellResult() { ResultType = SetCellResultType.Set };
         }
     }
 }

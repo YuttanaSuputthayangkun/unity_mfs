@@ -4,6 +4,7 @@ using Board;
 using Characters;
 using Cysharp.Threading.Tasks;
 using Input;
+using Settings;
 using Unity.Mathematics;
 using UnityEngine;
 using VContainer.Unity;
@@ -31,15 +32,19 @@ namespace State.Game
         private readonly BoardManager _boardManager;
         private readonly Camera _camera;
         private readonly CharacterSpawner _characterSpawner;
+        private readonly HeroRow _heroRow;
+        private readonly BoardSetting _boardSetting;
         public StateType GetStateType() => StateType.GameState;
 
         public GameState(PlayerInputManager playerInputManager, BoardManager boardManager, Camera camera,
-            CharacterSpawner characterSpawner)
+            CharacterSpawner characterSpawner, HeroRow heroRow, BoardSetting boardSetting)
         {
             _playerInputManager = playerInputManager;
             _boardManager = boardManager;
             _camera = camera;
             _characterSpawner = characterSpawner;
+            _heroRow = heroRow;
+            _boardSetting = boardSetting;
         }
 
         UniTask IAsyncStartable.StartAsync(CancellationToken cancellation) => PlayAsync(cancellation);
@@ -91,7 +96,7 @@ namespace State.Game
 
         private void SetupStartHero()
         {
-            
+            _heroRow.SetupStartHero();
         }
 
         private CollisionProcessResult ProcessCollision()

@@ -23,5 +23,7 @@ namespace Board
         {
             _cellComponent.transform.SetLocalPositionAndRotation(position, quaternion.identity); 
         }
+
+        public Vector3 GetWorldPosition() => _cellComponent.transform.position;
     }
 }

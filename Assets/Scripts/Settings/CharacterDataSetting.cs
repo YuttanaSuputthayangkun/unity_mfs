@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Characters;
 using Data;
 using UnityEngine;
 
@@ -13,7 +14,8 @@ namespace Settings
         [SerializeField] private EnemyData[] enemyDataList = null!;
         [SerializeField] private ObstacleData[] obstacleDataList = null!;
 
-        public IReadOnlyList<HeroData> HeroDataList => heroDataList;
+        // public IReadOnlyList<HeroData> HeroDataList => heroDataList;
+        public IReadOnlyList<IReadOnlyCharacterData<HeroType>> HeroDataList => heroDataList;
 
         public IReadOnlyList<EnemyData> EnemyDataList => enemyDataList;
 

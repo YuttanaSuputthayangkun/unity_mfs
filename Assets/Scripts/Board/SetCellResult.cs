@@ -4,17 +4,16 @@ namespace Board
 {
     public partial class BoardManager
     {
-        public enum GetCellResultType
+        public enum SetCellResultType
         {
-            Found,
+            Set,
             OutOfBound,
         }
 
-        public struct GetCellResult
+        public struct SetCellResult
         {
-            public GetCellResultType ResultType;
-            public bool IsFound => ResultType == GetCellResultType.Found;
-            public IReadOnlyCellData? CellData;
+            public SetCellResultType ResultType;
+            public bool IsSuccess => ResultType == SetCellResultType.Set;
 
             public override string ToString()
             {

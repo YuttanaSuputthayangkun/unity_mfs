@@ -10,11 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3057253765352509926, guid: e2edc4f86013c2840aeb9bd29a4f9eac, type: 3}
       propertyPath: m_Name
-      value: Hero_Rogue
-      objectReference: {fileID: 0}
-    - target: {fileID: 3057253765352509926, guid: e2edc4f86013c2840aeb9bd29a4f9eac, type: 3}
-      propertyPath: m_IsActive
-      value: 1
+      value: Hero
       objectReference: {fileID: 0}
     - target: {fileID: 6413886185591714439, guid: e2edc4f86013c2840aeb9bd29a4f9eac, type: 3}
       propertyPath: m_LocalPosition.x

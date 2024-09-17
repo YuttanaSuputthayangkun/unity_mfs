@@ -1,4 +1,5 @@
 using Data;
+using UnityEngine;
 
 #nullable enable
 
@@ -11,18 +12,19 @@ namespace Board
             BoardCoordinate Coordinate { get; }
             BoardObjectType? BoardObjectType { get; set; }
             bool IsOccupied { get; }
+            Vector3 WorldPosition { get; }
         }
 
-        private struct CellData : IReadOnlyCellData
+        private class CellData : IReadOnlyCellData
         {
             public BoardCoordinate Coordinate { get; set; }
-            public Cell Cell;
+            public Cell? Cell;
 
             public BoardObjectType? BoardObjectType { get; set; }
 
             public bool IsOccupied => BoardObjectType is not null;
 
-            // TODO: add some information here
+            public Vector3 WorldPosition => Cell!.GetWorldPosition();
         }
     }
 }

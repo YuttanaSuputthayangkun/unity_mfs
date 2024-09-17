@@ -3,6 +3,8 @@ using Characters;
 using Data;
 using UnityEngine;
 
+#nullable enable
+
 namespace Settings
 {
     [CreateAssetMenu(fileName = nameof(CharacterPrefabSetting),
@@ -10,12 +12,12 @@ namespace Settings
     public class CharacterPrefabSetting : ScriptableObject
     {
         [System.Serializable]
-        public class PrefabData<TType>
+        public class PrefabData<TType> where TType : struct
         {
             [SerializeField]
             private TType prefabType;
             [SerializeField]
-            private GameObject prefab;
+            private GameObject prefab = null!;
             
             public TType PrefabType => prefabType;
 
@@ -37,9 +39,9 @@ namespace Settings
         {
         }
 
-        [SerializeField] private HeroPrefabData[] heroPrefabDataList;
-        [SerializeField] private EnemyPrefabData[] enemyPrefabDataList;
-        [SerializeField] private ObstaclePrefabData[] obstaclePrefabDataList;
+        [SerializeField] private HeroPrefabData[] heroPrefabDataList = null!;
+        [SerializeField] private EnemyPrefabData[] enemyPrefabDataList = null!;
+        [SerializeField] private ObstaclePrefabData[] obstaclePrefabDataList = null!;
 
         public IReadOnlyList<HeroPrefabData> HeroPrefabDataList => heroPrefabDataList;
 

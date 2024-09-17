@@ -19,6 +19,23 @@ namespace Data
 
         public CharacterStats Stats => stats;
 
+        public CharacterData()
+        {
+        }
+
+        public CharacterData(TCharacterType characterType, CharacterStats stats) : this()
+        {
+            this.characterType = characterType;
+            this.stats = stats;
+        }
+
+        public CharacterData(IReadOnlyCharacterData<TCharacterType> readOnlyData) : this(
+            readOnlyData.Type,
+            readOnlyData.Stats
+        )
+        {
+        }
+
         public override string ToString()
         {
             return $"Type({characterType}) Stat({stats})";
@@ -28,15 +45,24 @@ namespace Data
     [System.Serializable]
     public class HeroData : CharacterData<HeroType>
     {
+        public HeroData(IReadOnlyCharacterData<HeroType> readOnlyData) : base(readOnlyData)
+        {
+        }
     }
 
     [System.Serializable]
     public class EnemyData : CharacterData<EnemyType>
     {
+        public EnemyData(IReadOnlyCharacterData<EnemyType> readOnlyData) : base(readOnlyData)
+        {
+        }
     }
 
     [System.Serializable]
     public class ObstacleData : CharacterData<ObstacleType>
     {
+        public ObstacleData(IReadOnlyCharacterData<ObstacleType> readOnlyData) : base(readOnlyData)
+        {
+        }
     }
 }

@@ -2,6 +2,7 @@ using System;
 
 namespace Data
 {
+    [System.Serializable]
     public struct BoardCoordinate
     {
         public int X;

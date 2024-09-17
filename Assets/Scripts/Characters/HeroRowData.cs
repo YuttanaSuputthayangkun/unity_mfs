@@ -12,14 +12,18 @@ namespace Characters
     {
         private BoardCoordinate _coordinate;
         private readonly HeroData _heroData;
+        private readonly Hero _hero;
 
         public BoardCoordinate Coordinate => _coordinate;
         public HeroData HeroData => _heroData;
 
-        public RowHeroData(BoardCoordinate coordinate, HeroData heroData)
+        public Hero Hero => _hero;
+
+        public RowHeroData(BoardCoordinate coordinate, HeroData heroData, Hero hero)
         {
             this._coordinate = coordinate;
             this._heroData = heroData;
+            _hero = hero;
         }
 
         public void UpdateCoordinate(BoardCoordinate coordinate)

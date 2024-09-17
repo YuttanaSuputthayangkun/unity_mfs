@@ -13,11 +13,15 @@ MonoBehaviour:
   m_Name: CharacterPrefabSetting
   m_EditorClassIdentifier: 
   heroPrefabDataList:
-  - PrefabType: 0
-    Prefab: {fileID: 6520552930564917913, guid: b4021dd23ec3d9945879cb868ee7e433, type: 3}
+  - prefabType: 0
+    prefab: {fileID: 6520552930564917913, guid: b4021dd23ec3d9945879cb868ee7e433, type: 3}
+  - prefabType: 1
+    prefab: {fileID: 6520552930564917913, guid: 84fbd178a7814c64faf18f0975ea2014, type: 3}
+  - prefabType: 2
+    prefab: {fileID: 6520552930564917913, guid: 9f0768c5070a085488f7d5b2564f5251, type: 3}
   enemyPrefabDataList:
-  - PrefabType: 0
-    Prefab: {fileID: 542342183893618889, guid: 3180e66cd0ee40e47aae14404f539072, type: 3}
+  - prefabType: 0
+    prefab: {fileID: 542342183893618889, guid: 3180e66cd0ee40e47aae14404f539072, type: 3}
   obstaclePrefabDataList:
-  - PrefabType: 0
-    Prefab: {fileID: 628749876637259125, guid: 78b09f172f193d341945a976e6e71bcd, type: 3}
+  - prefabType: 0
+    prefab: {fileID: 628749876637259125, guid: 78b09f172f193d341945a976e6e71bcd, type: 3}
