@@ -24,7 +24,10 @@ namespace Characters
         private readonly CharacterSpawner _spawner;
         private readonly CharacterDataSetting _characterDataSetting;
 
-        private readonly Queue<RowHeroData> _characterQueue = new Queue<RowHeroData>();
+        private readonly Queue<RowHeroData> _heroQueue = new();
+
+        // use this to check which hero is in the row
+        private readonly HashSet<Hero> _heroSet = new();
 
         public HeroRow(BoardManager boardManager, BoardSetting boardSetting, CharacterSpawner spawner,
             CharacterDataSetting characterDataSetting)
@@ -35,13 +38,15 @@ namespace Characters
             _characterDataSetting = characterDataSetting;
         }
 
-        public IEnumerable<IReadOnlyRowHeroData> RowHeroDataList => _characterQueue;
+        public IEnumerable<IReadOnlyRowHeroData> RowHeroDataList => _heroQueue;
 
-        private RowHeroData? Head => _characterQueue.Peek();
+        public int HeroCount => _heroQueue.Count;
+
+        private RowHeroData? Head => _heroQueue.Peek();
 
         public override string ToString()
         {
-            var characterStrings = _characterQueue.Select((x, i) => $"[{i}]{x}");
+            var characterStrings = _heroQueue.Select((x, i) => $"[{i}]{x}");
             return string.Join("\n", characterStrings);
         }
 
@@ -78,10 +83,16 @@ namespace Characters
             // store line information
             var newHeroData = new HeroData(heroData);
             var newRowData = new RowHeroData(boardCoordinate, newHeroData, spawnedHero);
-            _characterQueue.Enqueue(newRowData);
+            _heroQueue.Enqueue(newRowData);
+            _heroSet.Add(spawnedHero);
         }
 
-        public bool TryMove(Direction direction)
+        public bool ContainsHero(Hero hero)
+        {
+            return _heroSet.Contains(hero);
+        }
+
+        public MoveResultType TryMove(Direction direction)
         {
             // check from head if the direction is movable 
             var head = Head!;
@@ -89,60 +100,67 @@ namespace Characters
             var nextHeadCoordinate = headCoordinate.GetNeighbor(direction);
 
             var getCellResult = _boardManager.GetCell(nextHeadCoordinate);
-            if (getCellResult is { IsFound: true, CellData: { IsOccupied: false } })
+            if (!getCellResult.IsFound)
             {
-                // call direction, aside from the first one
-                var pairs = _characterQueue.ToPairsWithPreviousClass();
-                foreach (var (previousHero, hero) in pairs)
+                return MoveResultType.OutOfBound;
+            }
+
+            if (getCellResult.CellData!.IsOccupied)
+            {
+                return MoveResultType.OccupiedByOtherObject;
+            }
+
+            // call direction, aside from the first one
+            var pairs = _heroQueue.ToPairsWithPreviousClass();
+            foreach (var (previousHero, hero) in pairs)
+            {
+                if (previousHero is RowHeroData previous)
                 {
-                    if (previousHero is RowHeroData previous)
+                    // means this is not the head of the row
+                    // move to previous hero's position
+                    var nextCoordinate = previous.Coordinate;
+                    if (TryMoveHero(nextCoordinate, hero) != MoveResultType.Success)
                     {
-                        // means this is not the head of the row
-                        // move to previous hero's position
-                        var nextCoordinate = previous.Coordinate;
-                        if (!TryMoveHero(nextCoordinate, hero))
-                        {
-                            // TODO: use a proper exception type
-                            throw new Exception("this should not happen, following hero should always be able to move");
-                        }
-                    }
-                    else
-                    {
-                        // this is the head, go to next head coordinate
-                        if (!TryMoveHero(nextHeadCoordinate, hero))
-                        {
-                            // TODO: use a proper exception type
-                            throw new Exception("this should not happen, we've already checked head coordinate");
-                        }
+                        // TODO: use a proper exception type
+                        throw new Exception("this should not happen, following hero should always be able to move");
                     }
                 }
+                else
+                {
+                    // this is the head, go to next head coordinate
+                    if (TryMoveHero(nextHeadCoordinate, hero) != MoveResultType.Success)
+                    {
+                        // TODO: use a proper exception type
+                        throw new Exception("this should not happen, we've already checked head coordinate");
+                    }
+                }
+            }
 
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return MoveResultType.Success;
         }
 
-        private bool TryMoveHero(BoardCoordinate nextBoardCoordinate, RowHeroData rowHeroData)
+        private MoveResultType TryMoveHero(BoardCoordinate nextBoardCoordinate, RowHeroData rowHeroData)
         {
             var currentCoordinate = rowHeroData.Coordinate;
             var getCellResult = _boardManager.GetCell(nextBoardCoordinate);
-            if (getCellResult is { IsFound: true, CellData: { IsOccupied: false, WorldPosition: var nextWorldPosition } })
+            if (!getCellResult.IsFound)
             {
-                _boardManager.SetCellObjectType(nextBoardCoordinate, rowHeroData.Hero.BoardObjectType);
-                rowHeroData.UpdateCoordinate(nextBoardCoordinate);
-                rowHeroData.Hero.SetWorldPosition(nextWorldPosition);
+                return MoveResultType.OutOfBound;
+            }
 
-                _boardManager.SetCellObjectType(currentCoordinate, null);
-                
-                return true;
-            }
-            else
+            if (getCellResult.CellData!.IsOccupied)
             {
-                return false;
+                return MoveResultType.OccupiedByOtherObject;
             }
+
+            var nextWorldPosition = getCellResult.CellData!.WorldPosition;
+            _boardManager.SetCellObjectType(nextBoardCoordinate, rowHeroData.Hero.BoardObjectType);
+            rowHeroData.UpdateCoordinate(nextBoardCoordinate);
+            rowHeroData.Hero.SetWorldPosition(nextWorldPosition);
+
+            _boardManager.SetCellObjectType(currentCoordinate, null);
+
+            return MoveResultType.Success;
         }
     }
 }

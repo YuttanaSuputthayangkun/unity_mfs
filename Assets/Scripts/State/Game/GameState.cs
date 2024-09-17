@@ -3,6 +3,7 @@ using System.Threading;
 using Board;
 using Characters;
 using Cysharp.Threading.Tasks;
+using Data;
 using Input;
 using Settings;
 using Unity.Mathematics;
@@ -23,9 +24,10 @@ namespace State.Game
             public bool RotatedHero;
         }
 
-        private struct CollisionProcessResult
+        private struct CollisionCheckResult
         {
-            public bool HasCollision;
+            public object? CollidedObject;
+            public bool HasCollision => CollidedObject is not null;
         }
 
         private readonly PlayerInputManager _playerInputManager;
@@ -68,14 +70,37 @@ namespace State.Game
                 var direction = await _playerInputManager.WaitDirectionalInputAsync(cancellation);
                 Debug.Log($"{nameof(GameState)} StartAsync direction({direction})");
 
-                var collisionProcessResult = ProcessCollision();
-                if (collisionProcessResult.HasCollision)
+                var collisionProcessResult = CheckCollision();
+                // heaven or hell? let's rock!
+                switch (collisionProcessResult.CollidedObject)
                 {
-                    // heaven or hell? let's rock!
-                }
+                    case Hero hero:
+                    {
+                        if (_heroRow.ContainsHero(hero))
+                        {
+                            // collided with player's hero
+                            await ShowGameOverScreenAsync();
+                            return;
+                        }
 
-                bool hasMoved = _heroRow.TryMove(direction);
-                Debug.Log($"{nameof(GameState)} hasMoved({hasMoved})");
+                        MoveResultType moveResultType = _heroRow.TryMove(direction);
+                        Debug.Log($"{nameof(GameState)} moveResultType({moveResultType})");
+                    }
+                        break;
+                    case Enemy enemy:
+                        break;
+                    case Obstacle obstacle:
+                        // do nothing, I guess
+                        break;
+                    case null: // no collision
+                    {
+                        MoveResultType moveResultType = _heroRow.TryMove(direction);
+                        Debug.Log($"{nameof(GameState)} moveResultType({moveResultType})");
+                    }
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
 
                 SpawnCharacters();
             }
@@ -104,15 +129,24 @@ namespace State.Game
             _heroRow.SetupStartHero();
         }
 
-        private CollisionProcessResult ProcessCollision()
+        private CollisionCheckResult CheckCollision()
         {
             // TODO: implement this
 
-            return new CollisionProcessResult();
+            return new CollisionCheckResult()
+            {
+                CollidedObject = null,
+            };
         }
 
         private void SpawnCharacters()
         {
+        }
+
+        private async UniTask ShowGameOverScreenAsync()
+        {
+            // TODO: implement this
+            await UniTask.Delay(1);
         }
 
         void IDisposable.Dispose()
