@@ -16,7 +16,7 @@ namespace Characters
         IEnumerable<IReadOnlyRowHeroData> RowHeroDataList { get; }
     }
 
-    public class HeroRow :
+    public partial class HeroRow :
         IContainReadOnlyRowHeroDataList
     {
         private readonly BoardManager _boardManager;
@@ -24,10 +24,15 @@ namespace Characters
         private readonly CharacterSpawner _spawner;
         private readonly CharacterDataSetting _characterDataSetting;
 
-        private readonly Queue<RowHeroData> _heroQueue = new();
+        // private readonly Queue<RowHeroData> _heroQueue = new();
+        //
+        // // use this to check which hero is in the row
+        // private readonly HashSet<Hero> _heroSet = new();
+        //
+        // // use this to check a special case where we move to last hero's place(circling)
+        // private readonly 
 
-        // use this to check which hero is in the row
-        private readonly HashSet<Hero> _heroSet = new();
+        private readonly HeroList _heroList = new();
 
         public HeroRow(BoardManager boardManager, BoardSetting boardSetting, CharacterSpawner spawner,
             CharacterDataSetting characterDataSetting)
@@ -38,19 +43,14 @@ namespace Characters
             _characterDataSetting = characterDataSetting;
         }
 
-        public IEnumerable<IReadOnlyRowHeroData> RowHeroDataList => _heroQueue;
+        public IEnumerable<IReadOnlyRowHeroData> RowHeroDataList => _heroList.RowHeroDataList;
 
-        public int HeroCount => _heroQueue.Count;
+        public int HeroCount => _heroList.Count;
 
-        private RowHeroData? Head => _heroQueue.Peek();
+        private IReadOnlyRowHeroData? First => _heroList.GetFirst();
 
-        public override string ToString()
-        {
-            var characterStrings = _heroQueue.Select((x, i) => $"[{i}]{x}");
-            return string.Join("\n", characterStrings);
-        }
+        public override string ToString() => _heroList.ToString();
 
-        // public void SetupStartHero(BoardCoordinate boardCoordinate, IReadOnlyCharacterData<HeroType> readOnlyHeroData)
         public void SetupStartHero()
         {
             var boardCoordinate = _boardSetting.StartHeroCoordinate;
@@ -83,19 +83,17 @@ namespace Characters
             // store line information
             var newHeroData = new HeroData(heroData);
             var newRowData = new RowHeroData(boardCoordinate, newHeroData, spawnedHero);
-            _heroQueue.Enqueue(newRowData);
-            _heroSet.Add(spawnedHero);
+            _heroList.Add(newRowData);
         }
 
-        public bool ContainsHero(Hero hero)
-        {
-            return _heroSet.Contains(hero);
-        }
+        public bool ContainsHero(Hero hero) => _heroList.ContainsHero(hero);
+
+        public bool IsLastHero(Hero hero) => _heroList.GetLast()?.Hero == hero;
 
         public MoveResultType TryMove(Direction direction)
         {
             // check from head if the direction is movable 
-            var head = Head!;
+            var head = First!;
             var headCoordinate = head.Coordinate;
             var nextHeadCoordinate = headCoordinate.GetNeighbor(direction);
 
@@ -111,7 +109,7 @@ namespace Characters
             }
 
             // call direction, aside from the first one
-            var pairs = _heroQueue.ToPairsWithPreviousClass();
+            var pairs = _heroList.RowHeroDataList.ToPairsWithPreviousClass();
             foreach (var (previousHero, hero) in pairs)
             {
                 if (previousHero is RowHeroData previous)

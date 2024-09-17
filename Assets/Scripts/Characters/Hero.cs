@@ -1,3 +1,4 @@
+using Characters.Interfaces;
 using Data;
 using UnityEngine;
 
@@ -5,7 +6,9 @@ using UnityEngine;
 
 namespace Characters
 {
-    public class Hero : IContainBoardObjectType
+    public class Hero :
+        IContainBoardObjectType
+        , ISetWorldPosition
     {
         private readonly CharacterComponent _characterComponent;
         private readonly HeroData _heroData;
@@ -21,7 +24,7 @@ namespace Characters
         {
             return $"Component({_characterComponent.GetHashCode()}) Data({_heroData})";
         }
-        
+
         public void SetWorldPosition(Vector3 worldPosition)
         {
             _characterComponent.transform.position = worldPosition;

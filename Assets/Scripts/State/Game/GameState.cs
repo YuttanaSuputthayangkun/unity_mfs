@@ -3,10 +3,8 @@ using System.Threading;
 using Board;
 using Characters;
 using Cysharp.Threading.Tasks;
-using Data;
 using Input;
 using Settings;
-using Unity.Mathematics;
 using UnityEngine;
 using VContainer.Unity;
 
@@ -18,12 +16,6 @@ namespace State.Game
         , IAsyncStartable
         , IDisposable
     {
-        private struct PlayerInputResult
-        {
-            public bool Walked;
-            public bool RotatedHero;
-        }
-
         private struct CollisionCheckResult
         {
             public object? CollidedObject;
@@ -33,20 +25,24 @@ namespace State.Game
         private readonly PlayerInputManager _playerInputManager;
         private readonly BoardManager _boardManager;
         private readonly Camera _camera;
-        private readonly CharacterSpawner _characterSpawner;
         private readonly HeroRow _heroRow;
-        private readonly BoardSetting _boardSetting;
+        private readonly CharacterSpawnManager _characterSpawnManager;
+
         public StateType GetStateType() => StateType.GameState;
 
-        public GameState(PlayerInputManager playerInputManager, BoardManager boardManager, Camera camera,
-            CharacterSpawner characterSpawner, HeroRow heroRow, BoardSetting boardSetting)
+        public GameState(
+            PlayerInputManager playerInputManager,
+            BoardManager boardManager,
+            Camera camera,
+            HeroRow heroRow,
+            CharacterSpawnManager characterSpawnManager
+        )
         {
             _playerInputManager = playerInputManager;
             _boardManager = boardManager;
             _camera = camera;
-            _characterSpawner = characterSpawner;
             _heroRow = heroRow;
-            _boardSetting = boardSetting;
+            _characterSpawnManager = characterSpawnManager;
         }
 
         UniTask IAsyncStartable.StartAsync(CancellationToken cancellation) => PlayAsync(cancellation);
@@ -62,7 +58,7 @@ namespace State.Game
             await UniTask.Yield();
             Debug.Log($"{nameof(GameState)} StartAsync");
 
-            // one loop per turn
+            // one loop per action
             while (true)
             {
                 cancellation.ThrowIfCancellationRequested();
@@ -71,12 +67,12 @@ namespace State.Game
                 Debug.Log($"{nameof(GameState)} StartAsync direction({direction})");
 
                 var collisionProcessResult = CheckCollision();
-                // heaven or hell? let's rock!
                 switch (collisionProcessResult.CollidedObject)
                 {
                     case Hero hero:
                     {
-                        if (_heroRow.ContainsHero(hero))
+                        // I ignore last hero because it should be moved along, so it's okay
+                        if (_heroRow.ContainsHero(hero) && !_heroRow.IsLastHero(hero))
                         {
                             // collided with player's hero
                             await ShowGameOverScreenAsync();
@@ -88,6 +84,9 @@ namespace State.Game
                     }
                         break;
                     case Enemy enemy:
+                        // heaven or hell? let's rock!
+                        ProcessEnemyCollision();
+                        SpawnCharacters();
                         break;
                     case Obstacle obstacle:
                         // do nothing, I guess
@@ -101,8 +100,6 @@ namespace State.Game
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-
-                SpawnCharacters();
             }
         }
 
@@ -141,12 +138,20 @@ namespace State.Game
 
         private void SpawnCharacters()
         {
+            // TODO: implement a way to specify spawn type, so we don't spawn an obstacle
+            var spawnResult = _characterSpawnManager.RandomSpawn();
+            Debug.Log($"SpawnCharacters spawnResult:\n{spawnResult}");
         }
 
         private async UniTask ShowGameOverScreenAsync()
         {
             // TODO: implement this
             await UniTask.Delay(1);
+        }
+
+        private void ProcessEnemyCollision()
+        {
+            // TODO: implement this
         }
 
         void IDisposable.Dispose()

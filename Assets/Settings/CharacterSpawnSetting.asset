@@ -12,9 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9508408967c859b45814d6b23354f90d, type: 3}
   m_Name: CharacterSpawnSetting
   m_EditorClassIdentifier: 
-  characterTypeSpawningDataList:
+  characterTypeDataList:
   - characterType: 0
     weight: 1
-  heroSpawningChanceDataList:
+  heroTypeDataList:
   - heroType: 0
+    weight: 1
+  enemyTypeDataList: []
+  _obstacleTypeDataList: []
+  characterCountDataList:
+  - Count: 3
     weight: 1

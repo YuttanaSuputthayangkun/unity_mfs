@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Characters;
 using Data;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 #nullable enable
 
@@ -12,24 +13,54 @@ namespace Settings
     public class CharacterSpawnSetting : ScriptableObject
     {
         [System.Serializable]
-        public struct CharacterTypeSpawningData
+        public struct CharacterTypeData
         {
             public CharacterType characterType;
             public int weight;
         }
 
         [System.Serializable]
-        public struct HeroSpawningChanceData
+        public struct HeroTypeData
         {
             public HeroType heroType;
             public int weight;
         }
+        
+        [System.Serializable]
+        public struct EnemyTypeData
+        {
+            public EnemyType enemyType;
+            public int weight;
+        }
+        
+        [System.Serializable]
+        public struct ObstacleTypeData
+        {
+            public ObstacleType obstacleType;
+            public int weight;
+        }
 
-        [SerializeField] private CharacterTypeSpawningData[] characterTypeSpawningDataList = null!;
-        [SerializeField] private HeroSpawningChanceData[] heroSpawningChanceDataList = null!;
+        [System.Serializable]
+        public struct CharacterCountData
+        {
+            public int Count;
+            public int weight;
+        }
 
-        public IReadOnlyList<CharacterTypeSpawningData> CharacterTypeSpawningDataList => characterTypeSpawningDataList;
+        [SerializeField] private CharacterTypeData[] characterTypeDataList = null!;
+        [SerializeField] private HeroTypeData[] heroTypeDataList = null!;
+        [SerializeField] private EnemyTypeData[] enemyTypeDataList = null!;
+        [SerializeField] private ObstacleTypeData[] _obstacleTypeDataList = null!;
+        [SerializeField] private CharacterCountData[] characterCountDataList = null!;
 
-        public IReadOnlyList<HeroSpawningChanceData> HeroSpawningChanceDataList => heroSpawningChanceDataList;
+        public IReadOnlyList<CharacterTypeData> CharacterTypeDataList => characterTypeDataList;
+
+        public IReadOnlyList<HeroTypeData> HeroTypeDataList => heroTypeDataList;
+
+        public IReadOnlyList<EnemyTypeData> EnemyTypeDataList => enemyTypeDataList;
+
+        public IReadOnlyList<CharacterCountData> CharacterCountDataList => characterCountDataList;
+
+        public IReadOnlyList<ObstacleTypeData> ObstacleTypeDataList => _obstacleTypeDataList;
     }
 }

@@ -28,6 +28,7 @@ public class GameScope : LifetimeScope
         builder.Register<PlayerInputManager>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
         builder.Register<CharacterSpawner>(Lifetime.Singleton);
         builder.Register<HeroRow>(Lifetime.Singleton);
+        builder.Register<CharacterSpawnManager>(Lifetime.Singleton);
 
         builder.RegisterInstance(gameCamera);
 
