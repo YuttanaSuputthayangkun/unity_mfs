@@ -24,14 +24,6 @@ namespace Characters
         private readonly CharacterSpawner _spawner;
         private readonly CharacterDataSetting _characterDataSetting;
 
-        // private readonly Queue<RowHeroData> _heroQueue = new();
-        //
-        // // use this to check which hero is in the row
-        // private readonly HashSet<Hero> _heroSet = new();
-        //
-        // // use this to check a special case where we move to last hero's place(circling)
-        // private readonly 
-
         private readonly HeroList _heroList = new();
 
         public HeroRow(BoardManager boardManager, BoardSetting boardSetting, CharacterSpawner spawner,
