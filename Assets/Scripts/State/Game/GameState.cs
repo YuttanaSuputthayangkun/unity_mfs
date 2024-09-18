@@ -21,10 +21,6 @@ namespace State.Game
     {
         private struct ProcessCollisionCheckResult
         {
-            // public BoardCoordinate Coordinate;
-            // public ICharacter? Character;
-            // public bool IsPlayerCharacter;
-            // public bool HasCollision => Character is not null;
             public bool ShouldContinueGame;
         }
 
@@ -153,6 +149,7 @@ namespace State.Game
                     Debug.Log($"{nameof(GameState)} moveResultType({moveResultType})");
 
                     _heroRow.AddLast(originalTailCoordinate!, collidedHero);
+                    
                     break;
                 }
                 case Enemy enemy:
