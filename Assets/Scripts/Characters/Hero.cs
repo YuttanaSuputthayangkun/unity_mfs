@@ -8,6 +8,7 @@ namespace Characters
 {
     public class Hero :
         ICharacter
+        , ISetNumber
     {
         private readonly CharacterComponent _characterComponent;
         private readonly CharacterMoveHandler _characterMoveHandler;
@@ -16,7 +17,7 @@ namespace Characters
         private readonly HeroData _heroData;
 
         public Hero(
-            CharacterComponent characterComponent, 
+            CharacterComponent characterComponent,
             IReadOnlyCharacterData<HeroType> readOnlyCharacterData,
             CharacterMoveHandler characterMoveHandler,
             LocateCharacterHandler locateCharacterHandler,
@@ -37,6 +38,7 @@ namespace Characters
 
         public MoveResultType TryMove(BoardCoordinate coordinate) => _characterMoveHandler.TryMove(coordinate, this);
         public void Remove() => _removeCharacterHandler.RemoveCharacter(this);
+        public void SetNumber(int? number) => _characterComponent.SetNumber(number);
 
         public CharacterType GetCharacterType() => CharacterType.Hero;
 

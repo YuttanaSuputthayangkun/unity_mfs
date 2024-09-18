@@ -65,7 +65,7 @@ namespace Characters
 
             // create and setup new hero
             var spawnedHero = _spawner.SpawnHero(heroType);
-            // spawnedHero.SetWorldPosition(getCellResult.CellData!.WorldPosition); // let the pool do the work
+            spawnedHero.SetNumber(1);
 
             // update board cell type
             _boardManager.SetCellCharacter(boardCoordinate, spawnedHero);
@@ -77,7 +77,7 @@ namespace Characters
 
         public bool IsLastHero(Hero hero) => _heroList.GetLast() == hero;
 
-        public bool AddLast(BoardCoordinate coordinate)
+        public bool AddLast(BoardCoordinate coordinate, Hero hero)
         {
             var last = GetLast();
             if (last is null)

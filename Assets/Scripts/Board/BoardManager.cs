@@ -152,8 +152,6 @@ namespace Board
             }
 
             // remove existing character on cell by reverse map
-            // if (_cellDataMapByCoordinate!.TryGetValue(boardCoordinate, out var existingCellData))
-            // if (_cellDataMapByCoordinate!.TryGetValue(boardCoordinate, out var existingCellData))
             var existingCellData = _cellDataMapByCoordinate![boardCoordinate];
             if (existingCellData.Character is { } existingCharacter)
             {

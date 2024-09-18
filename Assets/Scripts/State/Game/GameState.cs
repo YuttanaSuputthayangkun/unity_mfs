@@ -85,6 +85,8 @@ namespace State.Game
                             await ShowGameOverScreenAsync();
                             return;
                         }
+                        
+                        Debug.Log($"{nameof(GameState)} collided with non player hero({hero})");
 
                         // TODO: call set coordinate from character instead
                         // _boardManager.SetCellCharacterType(collisionProcessResult.Coordinate, null);
@@ -94,7 +96,7 @@ namespace State.Game
                         MoveResultType moveResultType = _heroRow.TryMove(direction);
                         Debug.Log($"{nameof(GameState)} moveResultType({moveResultType})");
 
-                        _heroRow.AddLast(originalTailCoordinate!);
+                        _heroRow.AddLast(originalTailCoordinate!, hero);
 
                         // add to tail
                     }

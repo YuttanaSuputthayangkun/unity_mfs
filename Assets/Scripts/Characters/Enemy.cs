@@ -4,7 +4,9 @@ using UnityEngine;
 
 namespace Characters
 {
-    public class Enemy : ICharacter
+    public class Enemy : 
+        ICharacter
+        , ISetNumber
     {
         private readonly CharacterComponent _characterComponent;
         private readonly IReadOnlyCharacterData<EnemyType> _readOnlyCharacterData;
@@ -28,6 +30,8 @@ namespace Characters
         {
             return $"{_characterComponent.gameObject.name} Data({_readOnlyCharacterData})";
         }
+
+        public void SetNumber(int? number) => _characterComponent.SetNumber(number);
 
         public CharacterType GetCharacterType() => CharacterType.Enemy;
 

@@ -2,6 +2,8 @@ using Data;
 using Data.Interfaces;
 using IContainCharacterType = Data.Interfaces.IContainCharacterType;
 
+#nullable enable
+
 namespace Characters.Interfaces
 {
     public interface IReadOnlyCharacter : IContainBoardCoordinate

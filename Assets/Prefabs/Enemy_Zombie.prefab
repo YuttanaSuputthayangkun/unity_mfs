@@ -8,9 +8,15 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1708276056556855122, guid: 54cf3b27bd5fc4c4eb411b7997c3357b, type: 3}
+      propertyPath: m_text
+      value: 'Z
+
+'
+      objectReference: {fileID: 0}
     - target: {fileID: 3057253765352509926, guid: 54cf3b27bd5fc4c4eb411b7997c3357b, type: 3}
       propertyPath: m_Name
-      value: Enemy
+      value: Enemy_Zombie
       objectReference: {fileID: 0}
     - target: {fileID: 6413886185591714439, guid: 54cf3b27bd5fc4c4eb411b7997c3357b, type: 3}
       propertyPath: m_LocalPosition.x
