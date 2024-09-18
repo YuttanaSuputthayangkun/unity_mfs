@@ -113,7 +113,7 @@ namespace State.Game
             var nextCoordinate = headCoordinate!.Value.GetNeighbor(direction);
             var getCellResult = _boardManager.GetCell(nextCoordinate);
 
-            Debug.Log($"check collision, found character: {getCellResult.CellData?.Character}");
+            Debug.Log($"check collision, found character?: {getCellResult.CellData?.Character}");
 
             switch (getCellResult.CellData?.Character)
             {

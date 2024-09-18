@@ -17,7 +17,6 @@ namespace Characters
 
         public MoveResultType TryMove(BoardCoordinate nextBoardCoordinate, ICharacter character)
         {
-            var currentCoordinate = character.GetBoardCoordinate();
             var getCellResult = _boardManager.GetCell(nextBoardCoordinate);
             if (getCellResult.CellData is null)
             {

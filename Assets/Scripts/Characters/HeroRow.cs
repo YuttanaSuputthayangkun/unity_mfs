@@ -113,6 +113,11 @@ namespace Characters
                 throw new InvalidOperationException($"AddLast {placeResult}");
             }
 
+            var newNumber = _heroList.Count + 1;
+            hero.SetNumber(newNumber);
+
+            _heroList.Add(hero);
+
             return true;
         }
 
@@ -135,27 +140,47 @@ namespace Characters
             }
 
             // call direction, aside from the first one
-            var pairs = _heroList.RowHeroDataList.ToPairsWithPreviousClass();
-            foreach (var (previousHero, hero) in pairs)
+
+            var heroPairs = _heroList.RowHeroDataList.ToPairsWithPreviousClass();
+            var nextCoordinateHeroPairs = heroPairs.Select(
+                x =>
+                {
+                    var (previousHero, hero) = x;
+                    BoardCoordinate? nextCoordinate = previousHero?.GetBoardCoordinate();
+                    return (nextCoordinate, hero);
+                }
+            ).ToArray(); // ToArray to avoid multiple iteration
             {
-                if (previousHero is Hero previous)
+                // debug move list
+                // var strings = nextCoordinateHeroPairs.Select(x => $"{x.nextCoordinate} {x.hero}");
+                // var joined = string.Join("\n", strings);
+                // Debug.Log($"nextCoordinateHeroPairs: \n{joined}");
+            }
+            foreach (var (previousHeroCoordinate, hero) in nextCoordinateHeroPairs)
+            {
+                if (previousHeroCoordinate.HasValue)
                 {
                     // means this is not the head of the row
                     // move to previous hero's position
-                    var nextCoordinate = previous.GetBoardCoordinate()!.Value;
-                    if (hero.TryMove(nextCoordinate) != MoveResultType.Success)
+                    var moveResult = hero.TryMove(previousHeroCoordinate.Value);
+                    if (moveResult != MoveResultType.Success)
                     {
-                        // TODO: use a proper exception type
-                        throw new Exception("this should not happen, following hero should always be able to move");
+                        throw new InvalidOperationException(
+                            $"this should not happen, following hero should always be able to move\n" +
+                            $"previousHeroCoordinate: {previousHeroCoordinate.Value}\n" +
+                            $"move result:{moveResult}");
                     }
                 }
                 else
                 {
                     // this is the head, go to next head coordinate
-                    if (hero.TryMove(nextHeadCoordinate) != MoveResultType.Success)
+                    var moveResult = hero.TryMove(nextHeadCoordinate);
+                    Debug.Log($"TryMove head moveResult: {moveResult}");
+                    Debug.Log($"TryMove head board: {_boardManager.GetDebugText()}");
+                    if (moveResult != MoveResultType.Success)
                     {
-                        // TODO: use a proper exception type
-                        throw new Exception("this should not happen, we've already checked head coordinate");
+                        throw new InvalidOperationException(
+                            "this should not happen, we've already checked head coordinate");
                     }
                 }
             }
