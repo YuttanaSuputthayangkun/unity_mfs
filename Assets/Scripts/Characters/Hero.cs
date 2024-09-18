@@ -16,6 +16,8 @@ namespace Characters
         private readonly RemoveCharacterHandler _removeCharacterHandler;
         private readonly HeroData _heroData;
 
+        private int? number = null;
+
         public Hero(
             CharacterComponent characterComponent,
             IReadOnlyCharacterData<HeroType> readOnlyCharacterData,
@@ -33,12 +35,16 @@ namespace Characters
 
         public override string ToString()
         {
-            return $"{_characterComponent.gameObject.name} Data({_heroData})";
+            return $"{_characterComponent.gameObject.name} Data({_heroData}) Number({number})";
         }
 
         public MoveResultType TryMove(BoardCoordinate coordinate) => _characterMoveHandler.TryMove(coordinate, this);
         public void Remove() => _removeCharacterHandler.RemoveCharacter(this);
-        public void SetNumber(int? number) => _characterComponent.SetNumber(number);
+        public void SetNumber(int? number)
+        {
+            _characterComponent.SetNumber(number);
+            this.number = number;
+        }
 
         public CharacterType GetCharacterType() => CharacterType.Hero;
 

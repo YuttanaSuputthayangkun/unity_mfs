@@ -160,6 +160,8 @@ namespace State.Game
                 return result;
             }
 
+            Debug.Log($"check collision, found character: {getCellResult.CellData?.Character}");
+
             switch (getCellResult.CellData?.Character)
             {
                 case Hero hero:

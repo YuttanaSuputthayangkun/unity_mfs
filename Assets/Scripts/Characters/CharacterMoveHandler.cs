@@ -33,11 +33,6 @@ namespace Characters
             _boardManager.SetCellCharacter(nextBoardCoordinate, character);
             character.SetWorldPosition(nextWorldPosition);
 
-            if (currentCoordinate is { } validCurrentCoordinate)
-            {
-                _boardManager.SetCellCharacter(validCurrentCoordinate, null);
-            }
-
             return MoveResultType.Success;
         }
     }

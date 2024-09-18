@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Characters.Interfaces;
 using Data;
 using Extensions;
@@ -23,6 +24,21 @@ namespace Board
 
         // to get random cells
         private HashSet<BoardCoordinate>? _emptyCellCoordinateList = null;
+
+        public string GetDebugText()
+        {
+            StringBuilder sb = new();
+            var joinedCellDataMapByCoordinate =
+                string.Join("\n", _cellDataMapByCoordinate!.Select((x => $"{x.Key} {x.Value}")));
+            sb.Append($"joinedCellDataMapByCoordinate:\n{joinedCellDataMapByCoordinate}\n");
+            var joinedCoordinateMapByCharacter =
+                string.Join("\n", _coordinateMapByCharacter!.Select((x => $"{x.Key} {x.Value}")));
+            sb.Append($"joinedCoordinateMapByCharacter:\n{joinedCoordinateMapByCharacter}\n");
+            var joinedEmptyCellCoordinateList =
+                string.Join("\n", _emptyCellCoordinateList!.Select((x => x.ToString())));
+            sb.Append($"joinedEmptyCellCoordinateList:\n{joinedEmptyCellCoordinateList}\n");
+            return sb.ToString();
+        }
 
         public SetupBoardResult SetupBoard()
         {
@@ -119,6 +135,7 @@ namespace Board
 
             if (!_coordinateMapByCharacter!.TryGetValue(character, out var matchedCoordinate))
             {
+                Debug.Log($"GetCell character not found:\n{GetDebugText()}");
                 return new GetCellResult() { ResultType = GetCellResultType.NoCharacterOnBoard };
             }
 
@@ -151,12 +168,17 @@ namespace Board
                 return new SetCellResult() { ResultType = SetCellResultType.OutOfBound };
             }
 
-            // remove existing character on cell by reverse map
             var existingCellData = _cellDataMapByCoordinate![boardCoordinate];
+
             if (existingCellData.Character is { } existingCharacter)
             {
+                // remove existing character on cell by reverse map, for it to be moved to the new cell
+
+                existingCellData.Character = null;
+                Debug.Log($"SetCellCharacter set existing character to null\n{existingCellData}");
+            
                 _coordinateMapByCharacter!.Remove(existingCharacter);
-                
+
                 // to remove from the board(physically)
                 existingCharacter.Remove();
             }
@@ -168,14 +190,18 @@ namespace Board
             }
             else
             {
+                existingCellData.Character = character;
                 _coordinateMapByCharacter![character] = boardCoordinate;
+                Debug.Log($"set coordinate map by character({character}) coordinate({boardCoordinate})");
 
                 // by adding character, remove this coordinate to empty list
                 _emptyCellCoordinateList!.Remove(boardCoordinate);
             }
-            
+
             // physically move the character
             character?.SetWorldPosition(existingCellData.Cell!.GetWorldPosition());
+
+            Debug.Log($"SetCellCharacter character null? ({character is null})\n{GetDebugText()}");
 
             return new SetCellResult() { ResultType = SetCellResultType.Set };
         }
