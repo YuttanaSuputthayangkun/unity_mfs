@@ -7,6 +7,7 @@ using Extensions;
 using Input;
 using Settings;
 using State.Game;
+using UI;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -20,6 +21,7 @@ public class GameScope : LifetimeScope
     [SerializeField] private BoardManager boardManager = null!;
     [SerializeField] private Camera gameCamera = null!;
     [SerializeField] private CharacterPoolComponent characterPool = null!;
+    [SerializeField] private GameOverScreenComponent gameGameOverScreenComponent = null!;
 
     protected override void Configure(IContainerBuilder builder)
     {
@@ -48,9 +50,14 @@ public class GameScope : LifetimeScope
         builder.RegisterComponentInNewPrefab(cellPrefab, Lifetime.Transient);
         builder.Register<Board.Cell>(Lifetime.Transient).AsSelf();
 
+        // setttings
         builder.RegisterInstance(gameSetting.SpawnSetting);
         builder.RegisterInstance(gameSetting.PrefabSetting);
         builder.RegisterInstance(gameSetting.DataSetting);
+
+        // UI
+        builder.RegisterInstance(gameGameOverScreenComponent);
+        builder.Register<GameOverScreen>(Lifetime.Singleton);
 
         builder.RegisterFactory<IReadOnlyCharacterData<HeroType>, Hero>(container =>
         {

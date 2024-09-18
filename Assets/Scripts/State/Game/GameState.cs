@@ -7,6 +7,7 @@ using Cysharp.Threading.Tasks;
 using Data;
 using Input;
 using Settings;
+using UI;
 using UnityEngine;
 using VContainer.Unity;
 
@@ -33,6 +34,7 @@ namespace State.Game
         private readonly HeroRow _heroRow;
         private readonly CharacterSpawnManager _characterSpawnManager;
         private readonly NonPlayerCharacterList _nonPlayerCharacterList;
+        private readonly GameOverScreen _gameOverScreen;
 
         public StateType GetStateType() => StateType.GameState;
 
@@ -42,7 +44,8 @@ namespace State.Game
             Camera camera,
             HeroRow heroRow,
             CharacterSpawnManager characterSpawnManager,
-            NonPlayerCharacterList nonPlayerCharacterList
+            NonPlayerCharacterList nonPlayerCharacterList, // TODO: consider removing
+            GameOverScreen gameOverScreen
         )
         {
             _playerInputManager = playerInputManager;
@@ -51,6 +54,7 @@ namespace State.Game
             _heroRow = heroRow;
             _characterSpawnManager = characterSpawnManager;
             _nonPlayerCharacterList = nonPlayerCharacterList;
+            _gameOverScreen = gameOverScreen;
         }
 
         UniTask IAsyncStartable.StartAsync(CancellationToken cancellation) => PlayAsync(cancellation);
@@ -71,10 +75,19 @@ namespace State.Game
                 var direction = await _playerInputManager.WaitDirectionalInputAsync(cancellation);
                 Debug.Log($"{nameof(GameState)} StartAsync direction({direction})");
 
-                var collisionProcessResult = await ProcessCollisionAsync(direction, cancellation);
+                var collisionProcessResult = ProcessCollision(direction);
                 if (!collisionProcessResult.ShouldContinueGame)
                 {
-                    await ShowGameOverScreenAsync();
+                    await ShowGameOverScreenAsync(cancellation);
+
+                    // reload the scene
+                    {
+                        var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+                        var sceneName = scene.name!;
+                        _ = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(sceneName);
+                        UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+                    }
+
                     return;
                 }
             }
@@ -103,9 +116,8 @@ namespace State.Game
             _heroRow.SetupStartHero();
         }
 
-        private async UniTask<ProcessCollisionCheckResult> ProcessCollisionAsync(
-            Direction direction,
-            CancellationToken cancellationToken
+        private ProcessCollisionCheckResult ProcessCollision(
+            Direction direction
         )
         {
             var head = _heroRow.GetFirst()!;
@@ -132,7 +144,6 @@ namespace State.Game
                         else
                         {
                             // collided with player's hero
-                            await ShowGameOverScreenAsync();
                             return new ProcessCollisionCheckResult() { ShouldContinueGame = false };
                         }
                     }
@@ -183,11 +194,13 @@ namespace State.Game
             Debug.Log($"SpawnCharacters spawnResult:\n{spawnResult}");
         }
 
-        private async UniTask ShowGameOverScreenAsync()
+        private async UniTask ShowGameOverScreenAsync(CancellationToken cancellationToken)
         {
-            // TODO: implement this
+            _gameOverScreen.SetActive(true);
             Debug.Log($"GAME OVER!");
-            await UniTask.Delay(1);
+
+            // TODO: add more input
+            await _playerInputManager.WaitDirectionalInputAsync(cancellationToken);
         }
 
         private void ProcessEnemyCollision()

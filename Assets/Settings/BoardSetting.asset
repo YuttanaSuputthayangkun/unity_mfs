@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a96234d7869efd84ba69ba24b78c2e3d, type: 3}
   m_Name: BoardSetting
   m_EditorClassIdentifier: 
-  boardHeight: 4
-  boardWidth: 4
+  boardHeight: 16
+  boardWidth: 16
   cellComponentPrefab: {fileID: 9058011704400321299, guid: f54a2f055a53bf946a5171e7c791362e, type: 3}
   startHeroCoordinate:
-    X: 1
-    Y: 1
+    X: 8
+    Y: 8
   startHeroType: 0

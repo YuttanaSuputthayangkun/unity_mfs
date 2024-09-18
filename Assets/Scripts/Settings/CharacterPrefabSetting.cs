@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using Characters;
 using Data;
+using UI;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 #nullable enable
 
@@ -14,11 +16,9 @@ namespace Settings
         [System.Serializable]
         public class PrefabData<TType> where TType : struct
         {
-            [SerializeField]
-            private TType prefabType;
-            [SerializeField]
-            private GameObject prefab = null!;
-            
+            [SerializeField] private TType prefabType;
+            [SerializeField] private GameObject prefab = null!;
+
             public TType PrefabType => prefabType;
 
             public GameObject Prefab => prefab;
