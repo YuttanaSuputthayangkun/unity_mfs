@@ -24,8 +24,6 @@ namespace Characters
             // use this to check which hero is in the row
             private readonly HashSet<Hero> _heroSet = new();
 
-            private readonly Dictionary<BoardCoordinate, Hero> _heroMapByCoordinate = new();
-
             private Hero? _first = null;
 
             private Hero? _last = null;
@@ -47,11 +45,6 @@ namespace Characters
             public bool ContainsHero(Hero hero)
             {
                 return _heroSet.Contains(hero);
-            }
-
-            public Hero? GetHero(BoardCoordinate boardCoordinate)
-            {
-                return _heroMapByCoordinate.GetValueOrDefault(boardCoordinate);
             }
 
             public void Add(Hero hero)

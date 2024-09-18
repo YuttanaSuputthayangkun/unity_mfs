@@ -17,7 +17,6 @@ namespace Characters
         private readonly LocateCharacterHandler _locateCharacterHandler;
         private readonly RemoveCharacterHandler _removeCharacterHandler;
         private readonly Func<ICharacter, bool> _isPlayerCharacter;
-        private readonly NonPlayerCharacterList _nonPlayerCharacterList;
         private readonly HeroData _heroData;
 
         private int? number = null;
