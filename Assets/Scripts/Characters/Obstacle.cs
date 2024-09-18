@@ -30,6 +30,8 @@ namespace Characters
         }
 
         public CharacterType GetCharacterType() => CharacterType.Obstacle;
+        
+        public bool IsPlayerCharacter() => false;
 
         public MoveResultType TryMove(BoardCoordinate coordinate) => _moveCharacterHandler.TryMove(coordinate, this);
 

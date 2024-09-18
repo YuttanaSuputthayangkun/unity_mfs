@@ -35,7 +35,7 @@ public class GameScope : LifetimeScope
         builder.Register<LocateCharacterHandler>(Lifetime.Singleton);
 
         builder.RegisterInstance(gameCamera);
-        
+
         // setup pool
         builder.RegisterInstance(characterPool);
         builder.Register<CharacterPool>(Lifetime.Singleton);
@@ -74,7 +74,12 @@ public class GameScope : LifetimeScope
                     heroData,
                     moveHandler,
                     locateCharacterHandler,
-                    removeCharacterHandler
+                    removeCharacterHandler,
+                    (h) =>
+                    {
+                        var heroRow = container.Resolve<HeroRow>();
+                        return heroRow.ContainsHero((Hero)h);
+                    }
                 );
                 return newHero;
             };

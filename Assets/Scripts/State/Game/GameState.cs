@@ -18,12 +18,13 @@ namespace State.Game
         , IAsyncStartable
         , IDisposable
     {
-        private struct CollisionCheckResult
+        private struct ProcessCollisionCheckResult
         {
-            public BoardCoordinate Coordinate;
-            public ICharacter? Character;
-            public bool IsPlayerCharacter;
-            public bool HasCollision => Character is not null;
+            // public BoardCoordinate Coordinate;
+            // public ICharacter? Character;
+            // public bool IsPlayerCharacter;
+            // public bool HasCollision => Character is not null;
+            public bool ShouldContinueGame;
         }
 
         private readonly PlayerInputManager _playerInputManager;
@@ -62,9 +63,6 @@ namespace State.Game
             SetupStartHero();
             SpawnCharacters();
 
-            await UniTask.Yield();
-            Debug.Log($"{nameof(GameState)} StartAsync");
-
             // one loop per action
             while (true)
             {
@@ -73,53 +71,11 @@ namespace State.Game
                 var direction = await _playerInputManager.WaitDirectionalInputAsync(cancellation);
                 Debug.Log($"{nameof(GameState)} StartAsync direction({direction})");
 
-                var collisionProcessResult = CheckCollision(direction);
-                switch (collisionProcessResult.Character)
+                var collisionProcessResult = await ProcessCollisionAsync(direction, cancellation);
+                if (!collisionProcessResult.ShouldContinueGame)
                 {
-                    case Hero hero:
-                    {
-                        // I ignore last hero because it should be moved along, so it's okay
-                        if (_heroRow.ContainsHero(hero) && !_heroRow.IsLastHero(hero))
-                        {
-                            // collided with player's hero
-                            await ShowGameOverScreenAsync();
-                            return;
-                        }
-                        
-                        Debug.Log($"{nameof(GameState)} collided with non player hero({hero})");
-
-                        // TODO: call set coordinate from character instead
-                        // _boardManager.SetCellCharacterType(collisionProcessResult.Coordinate, null);
-
-                        var originalTailCoordinate = _heroRow.GetLast()!.GetBoardCoordinate()!.Value;
-
-                        MoveResultType moveResultType = _heroRow.TryMove(direction);
-                        Debug.Log($"{nameof(GameState)} moveResultType({moveResultType})");
-
-                        _heroRow.AddLast(originalTailCoordinate!, hero);
-
-                        // add to tail
-                    }
-                        break;
-                    case Enemy enemy:
-                        // heaven or hell? let's rock!
-                        ProcessEnemyCollision();
-                        SpawnCharacters();
-
-                        // TODO: move
-
-                        break;
-                    case Obstacle obstacle:
-                        // do nothing, I guess
-                        break;
-                    case null: // no collision
-                    {
-                        MoveResultType moveResultType = _heroRow.TryMove(direction);
-                        Debug.Log($"{nameof(GameState)} moveResultType({moveResultType})");
-                    }
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    await ShowGameOverScreenAsync();
+                    return;
                 }
             }
         }
@@ -147,33 +103,69 @@ namespace State.Game
             _heroRow.SetupStartHero();
         }
 
-        private CollisionCheckResult CheckCollision(Direction direction)
+        private async UniTask<ProcessCollisionCheckResult> ProcessCollisionAsync(
+            Direction direction,
+            CancellationToken cancellationToken
+        )
         {
             var head = _heroRow.GetFirst()!;
             var headCoordinate = head.GetBoardCoordinate();
             var nextCoordinate = headCoordinate!.Value.GetNeighbor(direction);
             var getCellResult = _boardManager.GetCell(nextCoordinate);
-            var result = new CollisionCheckResult() { Coordinate = nextCoordinate };
-            if (!getCellResult.IsFound)
-            {
-                // no collision, but won't be able to move anyway
-                return result;
-            }
 
             Debug.Log($"check collision, found character: {getCellResult.CellData?.Character}");
 
             switch (getCellResult.CellData?.Character)
             {
-                case Hero hero:
+                case Hero collidedHero:
                 {
-                    // bool isPlayerCharacter = _heroRow.ContainsHero(hero);
-                    throw new NotImplementedException();
+                    if (collidedHero.IsPlayerCharacter())
+                    {
+                        if (_heroRow.ContainsHero(collidedHero))
+                        {
+                            // collided with player's hero
+                            await ShowGameOverScreenAsync();
+                            return new ProcessCollisionCheckResult() { ShouldContinueGame = false };
+                        }
+                    }
+                    
+                    // TODO: might want to handle tail collision explicitly
+
+                    Debug.Log($"{nameof(GameState)} collided with non player hero({collidedHero})");
+
+                    var originalTailCoordinate = _heroRow.GetLast()!.GetBoardCoordinate()!.Value;
+
+                    // remove out of the way first to avoid collision
+                    _boardManager.RemoveCharacter(collidedHero.GetBoardCoordinate()!.Value);
+
+                    MoveResultType moveResultType = _heroRow.TryMove(direction);
+                    Debug.Log($"{nameof(GameState)} moveResultType({moveResultType})");
+
+                    _heroRow.AddLast(originalTailCoordinate!, collidedHero);
+                    break;
                 }
-                case null:
-                    return result;
+                case Enemy enemy:
+                    // heaven or hell? let's rock!
+                    ProcessEnemyCollision();
+                    SpawnCharacters();
+
+                    // TODO: move
+
+                    break;
+                case Obstacle obstacle:
+                    // do nothing, I guess
+                    break;
+                case null: // no collision
+                {
+                    MoveResultType moveResultType = _heroRow.TryMove(direction);
+                    Debug.Log($"{nameof(GameState)} moveResultType({moveResultType})");
+                }
+                    break;
                 default:
                     throw new NotImplementedException();
             }
+
+            return new ProcessCollisionCheckResult() { ShouldContinueGame = true };
         }
 
         private void SpawnCharacters()

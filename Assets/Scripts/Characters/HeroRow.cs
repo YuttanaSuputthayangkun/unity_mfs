@@ -86,18 +86,34 @@ namespace Characters
             var last = GetLast();
             if (last is null)
             {
-                // row is empty
-                return false;
+                // row is empty, cannot happen
+                throw new InvalidOperationException();
             }
 
-            // ensure added coordinate is a neighbor to the last
-            // bool isNeighborToLast = last.GetBoardCoordinate().IsNeighbor(coordinate);
-            // if (!isNeighborToLast)
-            // {
-            //     throw new ArgumentException("cannot add");
-            // }
+            var getResult = _boardManager.GetCell(coordinate);
+            if (!getResult.IsFound)
+            {
+                throw new ArgumentException("invalid coordinate, no cell");
+            }
 
-            throw new NotImplementedException();
+            var lastHeroCoordinate = last.GetBoardCoordinate()!.Value;
+            if (
+                !lastHeroCoordinate.IsNeighbor(coordinate)
+                && !lastHeroCoordinate.Equals(coordinate) // this is fine, it's when there's only one hero
+            )
+            {
+                throw new ArgumentException("cannot add cell that are not neighbor to the last hero\n" +
+                                            $"last: {last.GetBoardCoordinate()}\n" +
+                                            $"coordinate: {coordinate}");
+            }
+
+            var placeResult = _boardManager.PlaceCharacter(coordinate, hero);
+            if (!placeResult.IsSuccess)
+            {
+                throw new InvalidOperationException($"AddLast {placeResult}");
+            }
+
+            return true;
         }
 
         public MoveResultType TryMove(Direction direction)

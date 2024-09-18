@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Characters
 {
-    public class Enemy : 
+    public class Enemy :
         ICharacter
         , ISetNumber
     {
@@ -35,6 +35,8 @@ namespace Characters
 
         public CharacterType GetCharacterType() => CharacterType.Enemy;
 
+        public bool IsPlayerCharacter() => false;
+
         public MoveResultType TryMove(BoardCoordinate coordinate) => _moveCharacterHandler.TryMove(coordinate, this);
 
         public BoardCoordinate? GetBoardCoordinate()
@@ -46,7 +48,7 @@ namespace Characters
         {
             _characterComponent.transform.position = worldPosition;
         }
-        
+
         public void Remove() => _removeCharacterHandler.RemoveCharacter(this);
     }
 }

@@ -16,5 +16,6 @@ namespace Characters.Interfaces
     {
         MoveResultType TryMove(BoardCoordinate coordinate);
         void Remove();
+        bool IsPlayerCharacter();
     }
 }
