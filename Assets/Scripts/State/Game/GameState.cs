@@ -79,15 +79,7 @@ namespace State.Game
                 if (!collisionProcessResult.ShouldContinueGame)
                 {
                     await ShowGameOverScreenAsync(cancellation);
-
-                    // reload the scene
-                    {
-                        var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-                        var sceneName = scene.name!;
-                        _ = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(sceneName);
-                        UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
-                    }
-
+                    ReloadScene();
                     return;
                 }
             }
@@ -201,6 +193,14 @@ namespace State.Game
 
             // TODO: add more input
             await _playerInputManager.WaitDirectionalInputAsync(cancellationToken);
+        }
+
+        private void ReloadScene()
+        {
+            var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            var sceneName = scene.name!;
+            _ = UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(sceneName);
+            UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
         }
 
         private void ProcessEnemyCollision()
