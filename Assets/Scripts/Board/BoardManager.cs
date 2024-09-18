@@ -1,28 +1,28 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Characters.Interfaces;
 using Data;
+using Extensions;
 using Settings;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
-using Random = UnityEngine.Random;
 
 #nullable enable
 
 namespace Board
 {
     public partial class BoardManager : MonoBehaviour
-        , IInitializable
-        , IDisposable
     {
         [Inject] private BoardSetting _boardSetting = null!;
         [Inject] private LifetimeScope _lifetimeScope = null!;
 
-        private IDictionary<BoardCoordinate, CellData>? _cellDataMap = null;
+        private Dictionary<BoardCoordinate, CellData>? _cellDataMapByCoordinate = null;
+        private Dictionary<ICharacter, BoardCoordinate>? _coordinateMapByCharacter = null;
 
         // to get random cells
-        private List<BoardCoordinate>? _emptyCellCoordinateList = null;
+        private HashSet<BoardCoordinate>? _emptyCellCoordinateList = null;
 
         public SetupBoardResult SetupBoard()
         {
@@ -52,11 +52,13 @@ namespace Board
                     }
                 }
 
-                _cellDataMap = newCellDataMap;
+                _cellDataMapByCoordinate = newCellDataMap;
             }
 
             // every cells are empty cells
-            _emptyCellCoordinateList = _cellDataMap.Select(x => x.Key).ToList();
+            var newEmptyCellCoordinateList = _cellDataMapByCoordinate.Select(x => x.Key).ToArray();
+            newEmptyCellCoordinateList.Shuffle(); // shuffle now so we don't have to do it again when random spawn 
+            _emptyCellCoordinateList = newEmptyCellCoordinateList.ToHashSet();
 
             // set positions of the cells
             {
@@ -68,7 +70,7 @@ namespace Board
                     foreach (int y in Enumerable.Range(0, _boardSetting.BoardHeight))
                     {
                         var coordinate = new BoardCoordinate(x, y);
-                        var cell = _cellDataMap[coordinate].Cell;
+                        var cell = _cellDataMapByCoordinate[coordinate].Cell;
 
                         var newPosition = new Vector3(
                             basePosition.x + cellSize.x * x,
@@ -82,9 +84,11 @@ namespace Board
             }
 
             // produce setup result
-            var topLeftCell = _cellDataMap[(0, 0)].Cell;
+            var topLeftCell = _cellDataMapByCoordinate[(0, 0)].Cell;
             var bottomRightCell =
-                _cellDataMap[(_boardSetting.BoardHeight - 1, _boardSetting.BoardWidth - 1)].Cell;
+                _cellDataMapByCoordinate[(_boardSetting.BoardHeight - 1, _boardSetting.BoardWidth - 1)].Cell;
+
+            _coordinateMapByCharacter = new();
 
             var result = new SetupBoardResult
             {
@@ -97,25 +101,11 @@ namespace Board
             return result;
         }
 
-        void IInitializable.Initialize()
-        {
-            throw new NotImplementedException();
-        }
-
-        void IDisposable.Dispose()
-        {
-            // TODO: consider cleanup the cells if necessary
-            _cellDataMap = null;
-        }
-
         public GetCellResult GetCell(BoardCoordinate coordinate)
         {
-            if (_cellDataMap is null)
-            {
-                throw new NullReferenceException($"Please call {nameof(SetupBoard)}.");
-            }
+            ThrowIfNotSetup();
 
-            if (!_cellDataMap.TryGetValue(coordinate, out var cellData))
+            if (!_cellDataMapByCoordinate!.TryGetValue(coordinate, out var cellData))
             {
                 return new GetCellResult() { ResultType = GetCellResultType.OutOfBound };
             }
@@ -123,24 +113,37 @@ namespace Board
             return new GetCellResult() { ResultType = GetCellResultType.Found, CellData = cellData };
         }
 
-        public GetCellResult GetRandomEmptyCell()
+        public GetCellResult GetCell(ICharacter character)
         {
-            if (_cellDataMap is null || _emptyCellCoordinateList is null)
+            ThrowIfNotSetup();
+
+            if (!_coordinateMapByCharacter!.TryGetValue(character, out var matchedCoordinate))
             {
-                throw new NullReferenceException($"Please call {nameof(SetupBoard)}.");
+                return new GetCellResult() { ResultType = GetCellResultType.NoCharacterOnBoard };
             }
 
-            int randomEmptyCellIndex = Random.Range(0, _emptyCellCoordinateList.Count - 1);
-            var randomCoordinate = _emptyCellCoordinateList[randomEmptyCellIndex];
-            return GetCell(randomCoordinate);
+            return GetCell(matchedCoordinate);
         }
 
-        public SetCellResult SetCellObjectType(BoardCoordinate boardCoordinate, BoardObjectType? boardObjectType)
+        public int GetEmptyCellCount()
         {
-            if (_cellDataMap is null || _emptyCellCoordinateList is null)
-            {
-                throw new NullReferenceException($"Please call {nameof(SetupBoard)}.");
-            }
+            ThrowIfNotSetup();
+
+            return _emptyCellCoordinateList!.Count;
+        }
+
+        public GetCellResult GetRandomEmptyCell() => GetRandomEmptyCells(1).First();
+
+        public IEnumerable<GetCellResult> GetRandomEmptyCells(int count)
+        {
+            ThrowIfNotSetup();
+
+            return _emptyCellCoordinateList!.Take(count).Select(GetCell);
+        }
+
+        public SetCellResult SetCellCharacter(BoardCoordinate boardCoordinate, ICharacter? character)
+        {
+            ThrowIfNotSetup();
 
             var getResult = GetCell(boardCoordinate);
             if (getResult is { ResultType: GetCellResultType.OutOfBound })
@@ -148,9 +151,47 @@ namespace Board
                 return new SetCellResult() { ResultType = SetCellResultType.OutOfBound };
             }
 
-            _cellDataMap[boardCoordinate].BoardObjectType = boardObjectType;
+            // remove existing character on cell by reverse map
+            // if (_cellDataMapByCoordinate!.TryGetValue(boardCoordinate, out var existingCellData))
+            // if (_cellDataMapByCoordinate!.TryGetValue(boardCoordinate, out var existingCellData))
+            var existingCellData = _cellDataMapByCoordinate![boardCoordinate];
+            if (existingCellData.Character is { } existingCharacter)
+            {
+                _coordinateMapByCharacter!.Remove(existingCharacter);
+                
+                // to remove from the board(physically)
+                existingCharacter.Remove();
+            }
+
+            if (character is null)
+            {
+                // by removing character, add this coordinate to empty list
+                _emptyCellCoordinateList!.Add(boardCoordinate);
+            }
+            else
+            {
+                _coordinateMapByCharacter![character] = boardCoordinate;
+
+                // by adding character, remove this coordinate to empty list
+                _emptyCellCoordinateList!.Remove(boardCoordinate);
+            }
             
+            // physically move the character
+            character?.SetWorldPosition(existingCellData.Cell!.GetWorldPosition());
+
             return new SetCellResult() { ResultType = SetCellResultType.Set };
+        }
+
+        private void ThrowIfNotSetup()
+        {
+            if (
+                _cellDataMapByCoordinate is null
+                || _emptyCellCoordinateList is null
+                || _coordinateMapByCharacter is null
+            )
+            {
+                throw new NullReferenceException($"Please call {nameof(SetupBoard)}.");
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ namespace Board
         {
             Found,
             OutOfBound,
+            NoCharacterOnBoard,
         }
 
         public struct GetCellResult
@@ -18,7 +19,7 @@ namespace Board
 
             public override string ToString()
             {
-                return ResultType.ToString();
+                return $"{ResultType} {CellData}";
             }
         }
     }

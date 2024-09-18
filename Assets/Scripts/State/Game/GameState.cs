@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using Board;
 using Characters;
+using Characters.Interfaces;
 using Cysharp.Threading.Tasks;
 using Data;
 using Input;
@@ -19,8 +20,10 @@ namespace State.Game
     {
         private struct CollisionCheckResult
         {
-            public object? CollidedObject;
-            public bool HasCollision => CollidedObject is not null;
+            public BoardCoordinate Coordinate;
+            public ICharacter? Character;
+            public bool IsPlayerCharacter;
+            public bool HasCollision => Character is not null;
         }
 
         private readonly PlayerInputManager _playerInputManager;
@@ -28,6 +31,7 @@ namespace State.Game
         private readonly Camera _camera;
         private readonly HeroRow _heroRow;
         private readonly CharacterSpawnManager _characterSpawnManager;
+        private readonly NonPlayerCharacterList _nonPlayerCharacterList;
 
         public StateType GetStateType() => StateType.GameState;
 
@@ -36,7 +40,8 @@ namespace State.Game
             BoardManager boardManager,
             Camera camera,
             HeroRow heroRow,
-            CharacterSpawnManager characterSpawnManager
+            CharacterSpawnManager characterSpawnManager,
+            NonPlayerCharacterList nonPlayerCharacterList
         )
         {
             _playerInputManager = playerInputManager;
@@ -44,6 +49,7 @@ namespace State.Game
             _camera = camera;
             _heroRow = heroRow;
             _characterSpawnManager = characterSpawnManager;
+            _nonPlayerCharacterList = nonPlayerCharacterList;
         }
 
         UniTask IAsyncStartable.StartAsync(CancellationToken cancellation) => PlayAsync(cancellation);
@@ -68,7 +74,7 @@ namespace State.Game
                 Debug.Log($"{nameof(GameState)} StartAsync direction({direction})");
 
                 var collisionProcessResult = CheckCollision(direction);
-                switch (collisionProcessResult.CollidedObject)
+                switch (collisionProcessResult.Character)
                 {
                     case Hero hero:
                     {
@@ -80,14 +86,26 @@ namespace State.Game
                             return;
                         }
 
+                        // TODO: call set coordinate from character instead
+                        // _boardManager.SetCellCharacterType(collisionProcessResult.Coordinate, null);
+
+                        var originalTailCoordinate = _heroRow.GetLast()!.GetBoardCoordinate()!.Value;
+
                         MoveResultType moveResultType = _heroRow.TryMove(direction);
                         Debug.Log($"{nameof(GameState)} moveResultType({moveResultType})");
+
+                        _heroRow.AddLast(originalTailCoordinate!);
+
+                        // add to tail
                     }
                         break;
                     case Enemy enemy:
                         // heaven or hell? let's rock!
                         ProcessEnemyCollision();
                         SpawnCharacters();
+
+                        // TODO: move
+
                         break;
                     case Obstacle obstacle:
                         // do nothing, I guess
@@ -107,7 +125,7 @@ namespace State.Game
         private void SetupScene()
         {
             var setupBoardResult = _boardManager.SetupBoard();
-            // Debug.Log($"setupBoardResult({setupBoardResult})");
+            Debug.Log($"setupBoardResult({setupBoardResult})");
 
             // set camera in the middle of the board
             _camera.transform.GetPositionAndRotation(out var originalPosition, out _);
@@ -127,35 +145,44 @@ namespace State.Game
             _heroRow.SetupStartHero();
         }
 
-        private CollisionCheckResult CheckCollision(Direction direciton)
+        private CollisionCheckResult CheckCollision(Direction direction)
         {
-            var headCoordinate = _heroRow.First!.Coordinate;
-            var nextCoordinate = headCoordinate.GetNeighbor(direciton);
+            var head = _heroRow.GetFirst()!;
+            var headCoordinate = head.GetBoardCoordinate();
+            var nextCoordinate = headCoordinate!.Value.GetNeighbor(direction);
             var getCellResult = _boardManager.GetCell(nextCoordinate);
+            var result = new CollisionCheckResult() { Coordinate = nextCoordinate };
             if (!getCellResult.IsFound)
             {
                 // no collision, but won't be able to move anyway
-                return new CollisionCheckResult();
+                return result;
             }
-            
-            
 
-            return new CollisionCheckResult()
+            switch (getCellResult.CellData?.Character)
             {
-                CollidedObject = null,
-            };
+                case Hero hero:
+                {
+                    // bool isPlayerCharacter = _heroRow.ContainsHero(hero);
+                    throw new NotImplementedException();
+                }
+                case null:
+                    return result;
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         private void SpawnCharacters()
         {
             // TODO: implement a way to specify spawn type, so we don't spawn an obstacle
-            var spawnResult = _characterSpawnManager.RandomSpawn();
+            var spawnResult = _characterSpawnManager.RandomSpawnOnEmptyCells();
             Debug.Log($"SpawnCharacters spawnResult:\n{spawnResult}");
         }
 
         private async UniTask ShowGameOverScreenAsync()
         {
             // TODO: implement this
+            Debug.Log($"GAME OVER!");
             await UniTask.Delay(1);
         }
 

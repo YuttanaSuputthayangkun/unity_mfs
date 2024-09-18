@@ -19,6 +19,7 @@ public class GameScope : LifetimeScope
     [SerializeField] private CellComponent cellPrefab = null!;
     [SerializeField] private BoardManager boardManager = null!;
     [SerializeField] private Camera gameCamera = null!;
+    [SerializeField] private CharacterPoolComponent characterPool = null!;
 
     protected override void Configure(IContainerBuilder builder)
     {
@@ -29,8 +30,16 @@ public class GameScope : LifetimeScope
         builder.Register<CharacterSpawner>(Lifetime.Singleton);
         builder.Register<HeroRow>(Lifetime.Singleton);
         builder.Register<CharacterSpawnManager>(Lifetime.Singleton);
+        builder.Register<NonPlayerCharacterList>(Lifetime.Singleton);
+        builder.Register<CharacterMoveHandler>(Lifetime.Singleton);
+        builder.Register<LocateCharacterHandler>(Lifetime.Singleton);
 
         builder.RegisterInstance(gameCamera);
+        
+        // setup pool
+        builder.RegisterInstance(characterPool);
+        builder.Register<CharacterPool>(Lifetime.Singleton);
+        builder.Register<RemoveCharacterHandler>(Lifetime.Singleton);
 
         // register board
         builder.RegisterInstance(gameSetting.BoardSetting);
@@ -47,11 +56,26 @@ public class GameScope : LifetimeScope
         {
             return heroData =>
             {
+                var pool = container.Resolve<CharacterPool>();
+                if (pool.Pop(CharacterType.Hero) is Hero poolCharacter)
+                {
+                    return poolCharacter;
+                }
+
                 var heroPrefabData =
                     gameSetting.PrefabSetting.HeroPrefabDataList.First(x => x.PrefabType == heroData.Type)
                     ?? throw new NotSupportedException("Cannot find hero prefab with type: {type}");
                 var instantiated = container.Instantiate(heroPrefabData.Prefab);
-                var newHero = new Hero(instantiated.GetComponent<CharacterComponent>(), heroData);
+                var moveHandler = container.Resolve<CharacterMoveHandler>();
+                var locateCharacterHandler = container.Resolve<LocateCharacterHandler>();
+                var removeCharacterHandler = container.Resolve<RemoveCharacterHandler>();
+                var newHero = new Hero(
+                    instantiated.GetComponent<CharacterComponent>(),
+                    heroData,
+                    moveHandler,
+                    locateCharacterHandler,
+                    removeCharacterHandler
+                );
                 return newHero;
             };
         }, Lifetime.Transient);

@@ -8,6 +8,7 @@ namespace Board
         {
             Set,
             OutOfBound,
+            ReplacedCharacter,
         }
 
         public struct SetCellResult

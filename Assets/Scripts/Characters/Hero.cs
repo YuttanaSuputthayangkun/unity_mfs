@@ -7,22 +7,42 @@ using UnityEngine;
 namespace Characters
 {
     public class Hero :
-        IContainBoardObjectType
-        , ISetWorldPosition
+        ICharacter
     {
         private readonly CharacterComponent _characterComponent;
+        private readonly CharacterMoveHandler _characterMoveHandler;
+        private readonly LocateCharacterHandler _locateCharacterHandler;
+        private readonly RemoveCharacterHandler _removeCharacterHandler;
         private readonly HeroData _heroData;
-        public BoardObjectType BoardObjectType => Data.BoardObjectType.Hero;
 
-        public Hero(CharacterComponent characterComponent, IReadOnlyCharacterData<HeroType> readOnlyCharacterData)
+        public Hero(
+            CharacterComponent characterComponent, 
+            IReadOnlyCharacterData<HeroType> readOnlyCharacterData,
+            CharacterMoveHandler characterMoveHandler,
+            LocateCharacterHandler locateCharacterHandler,
+            RemoveCharacterHandler removeCharacterHandler
+        )
         {
             _characterComponent = characterComponent;
+            _characterMoveHandler = characterMoveHandler;
+            _locateCharacterHandler = locateCharacterHandler;
+            _removeCharacterHandler = removeCharacterHandler;
             _heroData = new HeroData(readOnlyCharacterData);
         }
 
         public override string ToString()
         {
-            return $"Component({_characterComponent.GetHashCode()}) Data({_heroData})";
+            return $"{_characterComponent.gameObject.name} Data({_heroData})";
+        }
+
+        public MoveResultType TryMove(BoardCoordinate coordinate) => _characterMoveHandler.TryMove(coordinate, this);
+        public void Remove() => _removeCharacterHandler.RemoveCharacter(this);
+
+        public CharacterType GetCharacterType() => CharacterType.Hero;
+
+        public BoardCoordinate? GetBoardCoordinate()
+        {
+            return _locateCharacterHandler.LocateCharacter(this);
         }
 
         public void SetWorldPosition(Vector3 worldPosition)

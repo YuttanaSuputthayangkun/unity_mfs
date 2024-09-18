@@ -25,5 +25,7 @@ namespace Board
         }
 
         public Vector3 GetWorldPosition() => _cellComponent.transform.position;
+
+        public override string ToString() => _cellComponent.gameObject.name;
     }
 }

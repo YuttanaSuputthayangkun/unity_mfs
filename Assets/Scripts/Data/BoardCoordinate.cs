@@ -5,7 +5,7 @@ using UnityEngine.InputSystem.XInput;
 namespace Data
 {
     [System.Serializable]
-    public struct BoardCoordinate
+    public struct BoardCoordinate 
     {
         public int X;
         public int Y;
@@ -40,8 +40,46 @@ namespace Data
             };
         }
 
+        public bool IsNeighbor(BoardCoordinate otherCoordinate)
+        {
+            foreach (var direction in (Direction[])Enum.GetValues(typeof(Direction)))
+            {
+                if (GetNeighbor(direction) == otherCoordinate)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public override string ToString() => $"({X}, {Y})";
 
         public static implicit operator BoardCoordinate((int x, int y) coordinate) => new(coordinate.x, coordinate.y);
+
+        public override bool Equals(object obj)
+        {
+            return obj switch
+            {
+                BoardCoordinate other => this == other,
+                _ => false,
+            };
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public static bool operator ==(BoardCoordinate a, BoardCoordinate b)
+        {
+            return a.X == b.X
+                   && a.Y == b.Y;
+        }
+
+        public static bool operator !=(BoardCoordinate a, BoardCoordinate b)
+        {
+            return !(a == b);
+        }
     }
 }

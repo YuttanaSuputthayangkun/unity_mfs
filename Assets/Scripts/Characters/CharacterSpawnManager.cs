@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Board;
 using Characters.Interfaces;
 using Data;
 using Settings;
+using UnityEngine;
 using Utilities;
 
 #nullable enable
@@ -12,26 +14,15 @@ namespace Characters
 {
     public class CharacterSpawnManager
     {
-        public struct SpawnedCharacterData
-        {
-            public BoardCoordinate BoardCoordinate;
-            public object SpawnedCharacter;
-
-            public override string ToString()
-            {
-                return $"Coordinate({BoardCoordinate}) Character({SpawnedCharacter.GetHashCode()})";
-            }
-        }
-
         public struct SpawningResult
         {
-            public SpawnedCharacterData[] SpawnedCharacterDataList;
+            public ICharacter[] SpawnedCharacterList;
 
-            public bool HasSpawned => SpawnedCharacterDataList?.Length > 0;
+            public bool HasSpawned => SpawnedCharacterList?.Length > 0;
 
             public override string ToString()
             {
-                var joinedCharacterString = string.Join("\n", SpawnedCharacterDataList.Select(x => x.ToString()));
+                var joinedCharacterString = string.Join("\n", SpawnedCharacterList.Select(x => x.ToString()));
                 return $"{nameof(HasSpawned)}\n" +
                        $"{joinedCharacterString}";
             }
@@ -40,6 +31,7 @@ namespace Characters
         private readonly CharacterSpawnSetting _spawnSetting;
         private readonly CharacterSpawner _spawner;
         private readonly BoardManager _boardManager;
+        private readonly NonPlayerCharacterList _nonPlayerCharacterList;
 
         private WeightedRandom<int>? _weightedRandomSpawnCount;
         private WeightedRandom<CharacterType>? _weightedRandomCharacterType;
@@ -47,62 +39,73 @@ namespace Characters
         private WeightedRandom<EnemyType>? _weightedRandomEnemyType;
         private WeightedRandom<ObstacleType>? _weightedRandomObstacleType;
 
+        private readonly Dictionary<BoardCoordinate, ICharacter> _characterMap = new();
+
         public CharacterSpawnManager(
             CharacterSpawnSetting spawnSetting,
             CharacterSpawner spawner,
-            BoardManager boardManager
+            BoardManager boardManager,
+            NonPlayerCharacterList nonPlayerCharacterList
         )
         {
             _spawnSetting = spawnSetting;
             _spawner = spawner;
             _boardManager = boardManager;
+            _nonPlayerCharacterList = nonPlayerCharacterList;
         }
 
-        public SpawningResult RandomSpawn()
+        public SpawningResult RandomSpawnOnEmptyCells()
         {
+            int emptyCellCount = _boardManager.GetEmptyCellCount();
             int spawnCount = GetRandomSpawnCount();
+            spawnCount = Mathf.Clamp(spawnCount, 0, emptyCellCount);
 
-            var spawnedDataList = Enumerable.Range(1, spawnCount).Select(
-                x =>
+            var spawnedList = Enumerable.Range(1, spawnCount)
+                .Select(
+                    _ =>
+                    {
+                        var characterType = GetRandomCharacterType();
+                        var spawned = characterType switch
+                        {
+                            CharacterType.Hero => _spawner.SpawnHero(GetRandomHeroType()) as ICharacter,
+                            CharacterType.Enemy => _spawner.SpawnEnemy(GetRandomEnemyType()) as ICharacter,
+                            CharacterType.Obstacle => _spawner.SpawnObstacle(GetRandomObstacleType()) as ICharacter,
+                            _ => throw new ArgumentOutOfRangeException()
+                        };
+                        return spawned;
+                    }
+                )
+                .Where(x => x is not null)
+                .Cast<ICharacter>()
+                .ToArray();
+
+
+            foreach (var spawned in spawnedList)
+            {
+                var emptyCell = _boardManager.GetRandomEmptyCell();
+                if (!emptyCell.IsFound)
                 {
-                    var emptyCell = _boardManager.GetRandomEmptyCell();
-                    if (!emptyCell.IsFound)
-                    {
-                        // out of empty cells
-                        return null;
-                    }
-
-                    var characterType = GetRandomCharacterType();
-                    var spawned = characterType switch
-                    {
-                        CharacterType.Hero => _spawner.SpawnHero(GetRandomHeroType()),
-                        CharacterType.Enemy => _spawner.SpawnEnemy(GetRandomEnemyType()),
-                        CharacterType.Obstacle => _spawner.SpawnObstacle(GetRandomObstacleType()),
-                        _ => throw new ArgumentOutOfRangeException()
-                    };
-
-                    if (spawned is ISetWorldPosition setWorldPosition)
-                    {
-                        setWorldPosition.SetWorldPosition(emptyCell.CellData!.WorldPosition);
-                    }
-                    else
-                    {
-                        throw new NotSupportedException(
-                            $"make sure to implement {nameof(ISetWorldPosition)} to spawned character");
-                    }
-
-                    return new SpawnedCharacterData()
-                    {
-                        BoardCoordinate = emptyCell.CellData!.Coordinate,
-                        SpawnedCharacter = spawned,
-                    } as SpawnedCharacterData?;
+                    throw new NotImplementedException(
+                        $"we've already checked the empty list count, this should not happen");
                 }
-            ).Where(x => x is not null).Cast<SpawnedCharacterData>().ToArray();
+
+                Debug.Log($"get random empty cell: {emptyCell}");
+
+                _boardManager.SetCellCharacter(emptyCell.CellData!.Coordinate, spawned);
+
+                // update non-player character list
+                _nonPlayerCharacterList.Push(spawned);
+            }
 
             return new SpawningResult()
             {
-                SpawnedCharacterDataList = spawnedDataList,
+                SpawnedCharacterList = spawnedList,
             };
+        }
+
+        public ICharacter? RemoveCharacter(BoardCoordinate boardCoordinate)
+        {
+            return _characterMap.GetValueOrDefault(boardCoordinate);
         }
 
         public int GetRandomSpawnCount()

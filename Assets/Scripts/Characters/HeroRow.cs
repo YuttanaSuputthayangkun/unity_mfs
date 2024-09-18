@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Board;
 using System.Linq;
+using Characters.Interfaces;
 using Data;
 using Extensions;
 using Settings;
@@ -11,13 +12,7 @@ using UnityEngine;
 
 namespace Characters
 {
-    public interface IContainReadOnlyRowHeroDataList
-    {
-        IEnumerable<IReadOnlyRowHeroData> RowHeroDataList { get; }
-    }
-
-    public partial class HeroRow :
-        IContainReadOnlyRowHeroDataList
+    public partial class HeroRow 
     {
         private readonly BoardManager _boardManager;
         private readonly BoardSetting _boardSetting;
@@ -26,8 +21,12 @@ namespace Characters
 
         private readonly HeroList _heroList = new();
 
-        public HeroRow(BoardManager boardManager, BoardSetting boardSetting, CharacterSpawner spawner,
-            CharacterDataSetting characterDataSetting)
+        public HeroRow(
+            BoardManager boardManager,
+            BoardSetting boardSetting,
+            CharacterSpawner spawner,
+            CharacterDataSetting characterDataSetting
+        )
         {
             _boardManager = boardManager;
             _boardSetting = boardSetting;
@@ -35,11 +34,13 @@ namespace Characters
             _characterDataSetting = characterDataSetting;
         }
 
-        public IEnumerable<IReadOnlyRowHeroData> RowHeroDataList => _heroList.RowHeroDataList;
+        public IEnumerable<IReadOnlyCharacter> ReadOnlyHeroList => _heroList.RowHeroDataList;
 
         public int HeroCount => _heroList.Count;
 
-        public IReadOnlyRowHeroData? First => _heroList.GetFirst();
+        public Hero? GetFirst() => _heroList.GetFirst();
+        
+        public Hero? GetLast() => _heroList.GetLast();
 
         public override string ToString() => _heroList.ToString();
 
@@ -56,38 +57,51 @@ namespace Characters
                 throw new IndexOutOfRangeException($"SetupStartHero can't find cell at ({boardCoordinate})");
             }
 
-            // this pattern match also checks for null
-            if (getCellResult.CellData is { IsOccupied: true })
+            if (getCellResult.CellData?.Character is not null)
             {
                 // TODO: use a proper exception type
                 throw new Exception($"SetupStartHero cell ({boardCoordinate}) is already occupied");
             }
 
-            // spawn
+            // create and setup new hero
             var spawnedHero = _spawner.SpawnHero(heroType);
-
-            // set position
-            spawnedHero.SetWorldPosition(getCellResult.CellData!.WorldPosition);
+            // spawnedHero.SetWorldPosition(getCellResult.CellData!.WorldPosition); // let the pool do the work
 
             // update board cell type
-            _boardManager.SetCellObjectType(boardCoordinate, BoardObjectType.Hero);
+            _boardManager.SetCellCharacter(boardCoordinate, spawnedHero);
 
-            // store line information
-            var newHeroData = new HeroData(heroData);
-            var newRowData = new RowHeroData(boardCoordinate, newHeroData, spawnedHero);
-            _heroList.Add(newRowData);
+            _heroList.Add(spawnedHero);
         }
 
         public bool ContainsHero(Hero hero) => _heroList.ContainsHero(hero);
 
-        public bool IsLastHero(Hero hero) => _heroList.GetLast()?.Hero == hero;
+        public bool IsLastHero(Hero hero) => _heroList.GetLast() == hero;
+
+        public bool AddLast(BoardCoordinate coordinate)
+        {
+            var last = GetLast();
+            if (last is null)
+            {
+                // row is empty
+                return false;
+            }
+            
+            // ensure added coordinate is a neighbor to the last
+            // bool isNeighborToLast = last.GetBoardCoordinate().IsNeighbor(coordinate);
+            // if (!isNeighborToLast)
+            // {
+            //     throw new ArgumentException("cannot add");
+            // }
+
+            throw new NotImplementedException();
+        }
 
         public MoveResultType TryMove(Direction direction)
         {
             // check from head if the direction is movable 
-            var head = First!;
-            var headCoordinate = head.Coordinate;
-            var nextHeadCoordinate = headCoordinate.GetNeighbor(direction);
+            var head = GetFirst()!;
+            var headCoordinate = head.GetBoardCoordinate();
+            var nextHeadCoordinate = headCoordinate!.Value.GetNeighbor(direction);
 
             var getCellResult = _boardManager.GetCell(nextHeadCoordinate);
             if (!getCellResult.IsFound)
@@ -95,7 +109,7 @@ namespace Characters
                 return MoveResultType.OutOfBound;
             }
 
-            if (getCellResult.CellData!.IsOccupied)
+            if (getCellResult.CellData?.Character is not null)
             {
                 return MoveResultType.OccupiedByOtherObject;
             }
@@ -104,12 +118,12 @@ namespace Characters
             var pairs = _heroList.RowHeroDataList.ToPairsWithPreviousClass();
             foreach (var (previousHero, hero) in pairs)
             {
-                if (previousHero is RowHeroData previous)
+                if (previousHero is Hero previous)
                 {
                     // means this is not the head of the row
                     // move to previous hero's position
-                    var nextCoordinate = previous.Coordinate;
-                    if (TryMoveHero(nextCoordinate, hero) != MoveResultType.Success)
+                    var nextCoordinate = previous.GetBoardCoordinate()!.Value;
+                    if (hero.TryMove(nextCoordinate) != MoveResultType.Success)
                     {
                         // TODO: use a proper exception type
                         throw new Exception("this should not happen, following hero should always be able to move");
@@ -118,37 +132,13 @@ namespace Characters
                 else
                 {
                     // this is the head, go to next head coordinate
-                    if (TryMoveHero(nextHeadCoordinate, hero) != MoveResultType.Success)
+                    if (hero.TryMove(nextHeadCoordinate) != MoveResultType.Success)
                     {
                         // TODO: use a proper exception type
                         throw new Exception("this should not happen, we've already checked head coordinate");
                     }
                 }
             }
-
-            return MoveResultType.Success;
-        }
-
-        private MoveResultType TryMoveHero(BoardCoordinate nextBoardCoordinate, RowHeroData rowHeroData)
-        {
-            var currentCoordinate = rowHeroData.Coordinate;
-            var getCellResult = _boardManager.GetCell(nextBoardCoordinate);
-            if (!getCellResult.IsFound)
-            {
-                return MoveResultType.OutOfBound;
-            }
-
-            if (getCellResult.CellData!.IsOccupied)
-            {
-                return MoveResultType.OccupiedByOtherObject;
-            }
-
-            var nextWorldPosition = getCellResult.CellData!.WorldPosition;
-            _boardManager.SetCellObjectType(nextBoardCoordinate, rowHeroData.Hero.BoardObjectType);
-            rowHeroData.UpdateCoordinate(nextBoardCoordinate);
-            rowHeroData.Hero.SetWorldPosition(nextWorldPosition);
-
-            _boardManager.SetCellObjectType(currentCoordinate, null);
 
             return MoveResultType.Success;
         }
