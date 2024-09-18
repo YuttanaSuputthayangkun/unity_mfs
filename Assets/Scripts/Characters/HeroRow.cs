@@ -71,7 +71,7 @@ namespace Characters
             var placeResult = _boardManager.PlaceCharacter(boardCoordinate, spawnedHero);
             if (!placeResult.IsSuccess)
             {
-                Debug.LogError($"SetupStartHero failed to place character {placeResult}");
+                throw new InvalidOperationException("SetupStartHero failed to place character {placeResult}");
             }
 
             _heroList.Add(spawnedHero);

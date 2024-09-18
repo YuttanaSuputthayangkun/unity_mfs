@@ -94,7 +94,8 @@ namespace Characters
                 var placeResult = _boardManager.PlaceCharacter(emptyCell.CellData!.Coordinate, spawned);
                 if (!placeResult.IsSuccess)
                 {
-                    Debug.LogError($"RandomSpawnOnEmptyCells failed to place character {placeResult}");
+                    throw new InvalidOperationException(
+                        "RandomSpawnOnEmptyCells  failed to place character {placeResult}");
                 }
 
                 // update non-player character list
