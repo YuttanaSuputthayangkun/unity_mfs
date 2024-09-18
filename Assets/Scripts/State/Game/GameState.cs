@@ -121,15 +121,23 @@ namespace State.Game
                 {
                     if (collidedHero.IsPlayerCharacter())
                     {
-                        if (_heroRow.ContainsHero(collidedHero))
+                        int? heroIndex = _heroRow.GetHeroIndex(collidedHero);
+                        // we will not show game over when player try to move back
+                        // but will do nothing and let the game continues
+                        if (heroIndex == 1)
+                        {
+                            // TODO: consider passing enum to signify the status
+                            return new ProcessCollisionCheckResult() { ShouldContinueGame = true };
+                        }
+                        else
                         {
                             // collided with player's hero
                             await ShowGameOverScreenAsync();
                             return new ProcessCollisionCheckResult() { ShouldContinueGame = false };
                         }
                     }
-                    
-                    // TODO: might want to handle tail collision explicitly
+
+                    // TODO: might want to handle tail collision explicitly, in case we want to be able to move to the tip
 
                     Debug.Log($"{nameof(GameState)} collided with non player hero({collidedHero})");
 

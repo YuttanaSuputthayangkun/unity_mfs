@@ -42,6 +42,8 @@ namespace Characters
 
         public Hero? GetLast() => _heroList.GetLast();
 
+        public int? GetHeroIndex(Hero hero) => _heroList.GetHeroIndex(hero);
+
         public override string ToString() => _heroList.ToString();
 
         public void SetupStartHero()

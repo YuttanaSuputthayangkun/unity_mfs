@@ -47,6 +47,15 @@ namespace Characters
                 return _heroSet.Contains(hero);
             }
 
+            public int? GetHeroIndex(Hero hero)
+            {
+                // TODO: do some index caching
+                return _heroQueue
+                    .Select((x, i) => (x, i) as (Hero hero, int index)?)
+                    .FirstOrDefault(x => x!.Value.hero == hero)
+                    ?.index;
+            }
+
             public void Add(Hero hero)
             {
                 _heroQueue.Enqueue(hero);
