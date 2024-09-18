@@ -16,6 +16,7 @@ namespace Characters
     {
         private readonly BoardManager _boardManager;
         private readonly BoardSetting _boardSetting;
+        private readonly CharacterSpawnSetting _characterSpawnSetting;
         private readonly CharacterSpawner _spawner;
         private readonly CharacterDataSetting _characterDataSetting;
 
@@ -24,12 +25,14 @@ namespace Characters
         public HeroRow(
             BoardManager boardManager,
             BoardSetting boardSetting,
+            CharacterSpawnSetting characterSpawnSetting,
             CharacterSpawner spawner,
             CharacterDataSetting characterDataSetting
         )
         {
             _boardManager = boardManager;
             _boardSetting = boardSetting;
+            _characterSpawnSetting = characterSpawnSetting;
             _spawner = spawner;
             _characterDataSetting = characterDataSetting;
         }
@@ -49,7 +52,7 @@ namespace Characters
         public void SetupStartHero()
         {
             var boardCoordinate = _boardSetting.StartHeroCoordinate;
-            var heroType = _boardSetting.StartHeroType;
+            var heroType = _characterSpawnSetting.StartHeroType;
             var heroData = _characterDataSetting.HeroDataList.First(x => x.Type == heroType)
                            ?? throw new NotSupportedException($"No data of hero with type: {heroType}");
 

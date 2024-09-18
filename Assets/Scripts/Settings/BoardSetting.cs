@@ -4,6 +4,7 @@ using Board;
 using Characters;
 using Data;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Settings
 {
@@ -14,7 +15,6 @@ namespace Settings
         [Range(0, 100)] [SerializeField] private int boardWidth;
         [SerializeField] private CellComponent cellComponentPrefab = null!;
         [SerializeField] private BoardCoordinate startHeroCoordinate = new BoardCoordinate(8, 8);
-        [SerializeField] private HeroType startHeroType = HeroType.Rogue;
 
         public int BoardHeight => boardHeight;
 
@@ -23,7 +23,5 @@ namespace Settings
         public CellComponent CellComponentPrefab => cellComponentPrefab;
 
         public BoardCoordinate StartHeroCoordinate => startHeroCoordinate;
-
-        public HeroType StartHeroType => startHeroType;
     }
 }

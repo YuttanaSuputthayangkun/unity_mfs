@@ -52,6 +52,9 @@ namespace Settings
         [SerializeField] private EnemyTypeData[] enemyTypeDataList = null!;
         [SerializeField] private ObstacleTypeData[] _obstacleTypeDataList = null!;
         [SerializeField] private CharacterCountData[] characterCountDataList = null!;
+        
+        [SerializeField] private HeroType startHeroType = HeroType.Rogue;
+        [Range(0, 100)] [SerializeField] private int randomStartHeroSpawnCount;
 
         public IReadOnlyList<CharacterTypeData> CharacterTypeDataList => characterTypeDataList;
 
@@ -62,5 +65,9 @@ namespace Settings
         public IReadOnlyList<CharacterCountData> CharacterCountDataList => characterCountDataList;
 
         public IReadOnlyList<ObstacleTypeData> ObstacleTypeDataList => _obstacleTypeDataList;
+
+        public HeroType StartHeroType => startHeroType;
+        
+        public int RandomStartHeroSpawnCount => randomStartHeroSpawnCount;
     }
 }

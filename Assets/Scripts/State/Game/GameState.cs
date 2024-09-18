@@ -61,7 +61,7 @@ namespace State.Game
 
             SetupScene();
             SetupStartHero();
-            SpawnCharacters();
+            RandomSpawnStartHeroes();
 
             // one loop per action
             while (true)
@@ -155,7 +155,7 @@ namespace State.Game
                 case Enemy enemy:
                     // heaven or hell? let's rock!
                     ProcessEnemyCollision();
-                    SpawnCharacters();
+                    SpawnCharacters(CharacterType.Enemy);
 
                     // TODO: move
 
@@ -176,11 +176,17 @@ namespace State.Game
             return new ProcessCollisionCheckResult() { ShouldContinueGame = true };
         }
 
-        private void SpawnCharacters()
+        // use random count if not specified
+        private void SpawnCharacters(CharacterType characterType, int? count = null)
         {
-            // TODO: implement a way to specify spawn type, so we don't spawn an obstacle
-            var spawnResult = _characterSpawnManager.RandomSpawnOnEmptyCells();
+            var spawnResult = _characterSpawnManager.RandomSpawnOnEmptyCells(characterType);
             Debug.Log($"SpawnCharacters spawnResult:\n{spawnResult}");
+        }
+
+        private void RandomSpawnStartHeroes()
+        {
+            var spawnResult = _characterSpawnManager.RandomSpawnStartHeroes();
+            Debug.Log($"RandomSpawnStartHeroes spawnResult:\n{spawnResult}");
         }
 
         private async UniTask ShowGameOverScreenAsync(CancellationToken cancellationToken)

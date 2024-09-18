@@ -54,17 +54,16 @@ namespace Characters
             _nonPlayerCharacterList = nonPlayerCharacterList;
         }
 
-        public SpawningResult RandomSpawnOnEmptyCells()
+        public SpawningResult RandomSpawnOnEmptyCells(CharacterType characterType, int? count = null)
         {
             int emptyCellCount = _boardManager.GetEmptyCellCount();
-            int spawnCount = GetRandomSpawnCount();
+            int spawnCount = count ?? GetRandomSpawnCount();
             spawnCount = Mathf.Clamp(spawnCount, 0, emptyCellCount);
 
             var spawnedList = Enumerable.Range(1, spawnCount)
                 .Select(
                     _ =>
                     {
-                        var characterType = GetRandomCharacterType();
                         var spawned = characterType switch
                         {
                             CharacterType.Hero => _spawner.SpawnHero(GetRandomHeroType()) as ICharacter,
@@ -108,9 +107,9 @@ namespace Characters
             };
         }
 
-        public ICharacter? RemoveCharacter(BoardCoordinate boardCoordinate)
+        public SpawningResult RandomSpawnStartHeroes()
         {
-            return _characterMap.GetValueOrDefault(boardCoordinate);
+            return RandomSpawnOnEmptyCells(CharacterType.Hero, _spawnSetting.RandomStartHeroSpawnCount);
         }
 
         public int GetRandomSpawnCount()
