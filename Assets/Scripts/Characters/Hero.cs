@@ -11,7 +11,7 @@ namespace Characters
         , ISetNumber
     {
         private readonly CharacterComponent _characterComponent;
-        private readonly CharacterMoveHandler _characterMoveHandler;
+        private readonly MoveCharacterHandler _moveCharacterHandler;
         private readonly LocateCharacterHandler _locateCharacterHandler;
         private readonly RemoveCharacterHandler _removeCharacterHandler;
         private readonly HeroData _heroData;
@@ -21,13 +21,13 @@ namespace Characters
         public Hero(
             CharacterComponent characterComponent,
             IReadOnlyCharacterData<HeroType> readOnlyCharacterData,
-            CharacterMoveHandler characterMoveHandler,
+            MoveCharacterHandler moveCharacterHandler,
             LocateCharacterHandler locateCharacterHandler,
             RemoveCharacterHandler removeCharacterHandler
         )
         {
             _characterComponent = characterComponent;
-            _characterMoveHandler = characterMoveHandler;
+            _moveCharacterHandler = moveCharacterHandler;
             _locateCharacterHandler = locateCharacterHandler;
             _removeCharacterHandler = removeCharacterHandler;
             _heroData = new HeroData(readOnlyCharacterData);
@@ -38,7 +38,7 @@ namespace Characters
             return $"{_characterComponent.gameObject.name} Data({_heroData}) Number({number})";
         }
 
-        public MoveResultType TryMove(BoardCoordinate coordinate) => _characterMoveHandler.TryMove(coordinate, this);
+        public MoveResultType TryMove(BoardCoordinate coordinate) => _moveCharacterHandler.TryMove(coordinate, this);
         public void Remove() => _removeCharacterHandler.RemoveCharacter(this);
         public void SetNumber(int? number)
         {

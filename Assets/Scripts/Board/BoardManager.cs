@@ -158,14 +158,36 @@ namespace Board
             return _emptyCellCoordinateList!.Take(count).Select(GetCell);
         }
 
-        public SetCellResult SetCellCharacter(BoardCoordinate boardCoordinate, ICharacter? character)
+        public PlaceCharacterResult PlaceCharacter(BoardCoordinate boardCoordinate, ICharacter character)
         {
             ThrowIfNotSetup();
 
             var getResult = GetCell(boardCoordinate);
             if (getResult is { ResultType: GetCellResultType.OutOfBound })
             {
-                return new SetCellResult() { ResultType = SetCellResultType.OutOfBound };
+                return new PlaceCharacterResult()
+                    { ResultType = PlaceCharacterResultType.OutOfBound };
+            }
+
+            if (getResult.CellData?.Character is { })
+            {
+                return new PlaceCharacterResult() { ResultType = PlaceCharacterResultType.CellOccupied };
+            }
+
+            SetCharacterCell(boardCoordinate, character);
+
+            return new PlaceCharacterResult() { ResultType = PlaceCharacterResultType.Placed };
+        }
+
+        public RemoveCharacterFromCellResult RemoveCharacter(BoardCoordinate boardCoordinate)
+        {
+            ThrowIfNotSetup();
+
+            var getResult = GetCell(boardCoordinate);
+            if (getResult is { ResultType: GetCellResultType.OutOfBound })
+            {
+                return new RemoveCharacterFromCellResult()
+                    { ResultType = RemoveCharacterFromCellResultType.OutOfBound };
             }
 
             var existingCellData = _cellDataMapByCoordinate![boardCoordinate];
@@ -175,35 +197,73 @@ namespace Board
                 // remove existing character on cell by reverse map, for it to be moved to the new cell
 
                 existingCellData.Character = null;
-                Debug.Log($"SetCellCharacter set existing character to null\n{existingCellData}");
-            
+
                 _coordinateMapByCharacter!.Remove(existingCharacter);
 
                 // to remove from the board(physically)
-                existingCharacter.Remove();
+                // existingCharacter.Remove();
+                // TODO: make sure to call this somewhere else
             }
 
-            if (character is null)
-            {
-                // by removing character, add this coordinate to empty list
-                _emptyCellCoordinateList!.Add(boardCoordinate);
-            }
-            else
-            {
-                existingCellData.Character = character;
-                _coordinateMapByCharacter![character] = boardCoordinate;
-                Debug.Log($"set coordinate map by character({character}) coordinate({boardCoordinate})");
+            // by removing character, add this coordinate to empty list
+            _emptyCellCoordinateList!.Add(boardCoordinate);
 
-                // by adding character, remove this coordinate to empty list
-                _emptyCellCoordinateList!.Remove(boardCoordinate);
+            return new RemoveCharacterFromCellResult()
+                { ResultType = RemoveCharacterFromCellResultType.Removed };
+        }
+
+        public MoveCharacterResult MoveCharacter(BoardCoordinate boardCoordinate, ICharacter character)
+        {
+            ThrowIfNotSetup();
+
+            var getResult = GetCell(boardCoordinate);
+            if (getResult is { ResultType: GetCellResultType.OutOfBound })
+            {
+                return new MoveCharacterResult() { ResultType = MoveCharacterResultType.OutOfBound };
             }
+
+            if (getResult.CellData?.Character is { })
+            {
+                return new MoveCharacterResult() { ResultType = MoveCharacterResultType.CellOccupied };
+            }
+
+            var currentCharacterCoordinate = character.GetBoardCoordinate();
+            if (currentCharacterCoordinate is null)
+            {
+                return new MoveCharacterResult() { ResultType = MoveCharacterResultType.CharacterIsNotOnBoard };
+            }
+
+            if (currentCharacterCoordinate == boardCoordinate)
+            {
+                return new MoveCharacterResult() { ResultType = MoveCharacterResultType.SameCoordinate };
+            }
+
+
+            // we don't have to remove by this method any more, because we just removed character.remove call from
+            // RemoveCharacter method, so now we can use it here
+            RemoveCharacter(currentCharacterCoordinate!.Value);
+            // no need to care the result, we just need to make sure it's removed
+
+            SetCharacterCell(boardCoordinate, character);
+
+            return new MoveCharacterResult() { ResultType = MoveCharacterResultType.Moved };
+        }
+
+        private void SetCharacterCell(BoardCoordinate boardCoordinate, ICharacter character)
+        {
+            var cellData = _cellDataMapByCoordinate![boardCoordinate];
+
+            cellData.Character = character;
+            _coordinateMapByCharacter![character] = boardCoordinate;
+            // Debug.Log($"set coordinate map by character({character}) coordinate({boardCoordinate})");
+
+            // by adding character, remove this coordinate to empty list
+            _emptyCellCoordinateList!.Remove(boardCoordinate);
 
             // physically move the character
-            character?.SetWorldPosition(existingCellData.Cell!.GetWorldPosition());
+            character?.SetWorldPosition(cellData.Cell!.GetWorldPosition());
 
-            Debug.Log($"SetCellCharacter character null? ({character is null})\n{GetDebugText()}");
-
-            return new SetCellResult() { ResultType = SetCellResultType.Set };
+            // Debug.Log($"SetCellCharacter character null? ({character is null})\n{GetDebugText()}");
         }
 
         private void ThrowIfNotSetup()

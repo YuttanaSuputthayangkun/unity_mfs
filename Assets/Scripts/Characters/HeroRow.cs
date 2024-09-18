@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Characters
 {
-    public partial class HeroRow 
+    public partial class HeroRow
     {
         private readonly BoardManager _boardManager;
         private readonly BoardSetting _boardSetting;
@@ -39,7 +39,7 @@ namespace Characters
         public int HeroCount => _heroList.Count;
 
         public Hero? GetFirst() => _heroList.GetFirst();
-        
+
         public Hero? GetLast() => _heroList.GetLast();
 
         public override string ToString() => _heroList.ToString();
@@ -68,7 +68,11 @@ namespace Characters
             spawnedHero.SetNumber(1);
 
             // update board cell type
-            _boardManager.SetCellCharacter(boardCoordinate, spawnedHero);
+            var placeResult = _boardManager.PlaceCharacter(boardCoordinate, spawnedHero);
+            if (!placeResult.IsSuccess)
+            {
+                Debug.LogError($"SetupStartHero failed to place character {placeResult}");
+            }
 
             _heroList.Add(spawnedHero);
         }
@@ -85,7 +89,7 @@ namespace Characters
                 // row is empty
                 return false;
             }
-            
+
             // ensure added coordinate is a neighbor to the last
             // bool isNeighborToLast = last.GetBoardCoordinate().IsNeighbor(coordinate);
             // if (!isNeighborToLast)

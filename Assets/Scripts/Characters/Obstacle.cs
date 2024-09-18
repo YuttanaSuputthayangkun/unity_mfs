@@ -8,19 +8,19 @@ namespace Characters
     {
         private readonly CharacterComponent _characterComponent;
         private readonly IReadOnlyCharacterData<ObstacleType> _readOnlyCharacterData;
-        private readonly CharacterMoveHandler _characterMoveHandler;
+        private readonly MoveCharacterHandler _moveCharacterHandler;
         private readonly RemoveCharacterHandler _removeCharacterHandler;
 
         public Obstacle(
             CharacterComponent characterComponent,
             IReadOnlyCharacterData<ObstacleType> readOnlyCharacterData,
-            CharacterMoveHandler characterMoveHandler,
+            MoveCharacterHandler moveCharacterHandler,
             RemoveCharacterHandler removeCharacterHandler
         )
         {
             _characterComponent = characterComponent;
             _readOnlyCharacterData = readOnlyCharacterData;
-            _characterMoveHandler = characterMoveHandler;
+            _moveCharacterHandler = moveCharacterHandler;
             _removeCharacterHandler = removeCharacterHandler;
         }
 
@@ -31,7 +31,7 @@ namespace Characters
 
         public CharacterType GetCharacterType() => CharacterType.Obstacle;
 
-        public MoveResultType TryMove(BoardCoordinate coordinate) => _characterMoveHandler.TryMove(coordinate, this);
+        public MoveResultType TryMove(BoardCoordinate coordinate) => _moveCharacterHandler.TryMove(coordinate, this);
 
         public BoardCoordinate? GetBoardCoordinate()
         {

@@ -4,11 +4,11 @@ using Data;
 
 namespace Characters
 {
-    public class CharacterMoveHandler
+    public class MoveCharacterHandler
     {
         private readonly BoardManager _boardManager;
 
-        public CharacterMoveHandler(
+        public MoveCharacterHandler(
             BoardManager boardManager
         )
         {
@@ -30,7 +30,7 @@ namespace Characters
             }
 
             var nextWorldPosition = getCellResult.CellData.WorldPosition;
-            _boardManager.SetCellCharacter(nextBoardCoordinate, character);
+            _boardManager.MoveCharacter(nextBoardCoordinate, character);
             character.SetWorldPosition(nextWorldPosition);
 
             return MoveResultType.Success;

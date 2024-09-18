@@ -91,7 +91,11 @@ namespace Characters
 
                 Debug.Log($"get random empty cell: {emptyCell}");
 
-                _boardManager.SetCellCharacter(emptyCell.CellData!.Coordinate, spawned);
+                var placeResult = _boardManager.PlaceCharacter(emptyCell.CellData!.Coordinate, spawned);
+                if (!placeResult.IsSuccess)
+                {
+                    Debug.LogError($"RandomSpawnOnEmptyCells failed to place character {placeResult}");
+                }
 
                 // update non-player character list
                 _nonPlayerCharacterList.Push(spawned);
