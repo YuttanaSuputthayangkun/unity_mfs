@@ -59,14 +59,11 @@ namespace Characters
         public Enemy SpawnEnemy(EnemyType enemyType)
         {
             // since the list is pretty small, linear search is fine
-            var prefab = _characterPrefabSetting.EnemyPrefabDataList.First(x => x.PrefabType == enemyType)?.Prefab
-                         ?? throw new NotSupportedException(enemyType.ToString());
-
-            using (LifetimeScope.EnqueueParent(_lifetimeScope))
-            {
-                var newEnemy = _lifetimeScope.Container.Resolve<Enemy>();
-                return newEnemy;
-            }
+            var enemyData = _characterDataSetting.EnemyDataList.First(x => x.Type == enemyType)
+                           ?? throw new NotSupportedException(enemyType.ToString());
+            var factory = _lifetimeScope.Container.Resolve<Func<IReadOnlyCharacterData<EnemyType>, Enemy>>()
+                          ?? throw new SystemException($"Cannot find enemy factory");
+            return factory.Invoke(enemyData);
         }
 
         public Enemy RandomSpawnEnemy()

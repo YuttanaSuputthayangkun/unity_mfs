@@ -128,9 +128,7 @@ namespace Characters
 
         public Hero RemoveFirst()
         {
-            
-            
-            throw new NotImplementedException();
+            return _heroList.RemoveFirst();
         }
 
         public MoveResultType TryMove(Direction direction)

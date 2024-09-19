@@ -111,6 +111,11 @@ namespace Characters
         {
             return RandomSpawnOnEmptyCells(CharacterType.Hero, _spawnSetting.RandomStartHeroSpawnCount);
         }
+        
+        public SpawningResult RandomSpawnStartEnemies()
+        {
+            return RandomSpawnOnEmptyCells(CharacterType.Enemy, _spawnSetting.RandomStartEnemySpawnCount);
+        }
 
         public int GetRandomSpawnCount()
         {

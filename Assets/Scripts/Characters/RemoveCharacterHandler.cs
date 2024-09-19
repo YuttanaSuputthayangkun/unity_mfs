@@ -5,13 +5,16 @@ namespace Characters
 {
     public class RemoveCharacterHandler
     {
-        public RemoveCharacterHandler(CharacterPoolComponent characterPool)
+        private readonly CharacterPool _characterPool;
+
+        public RemoveCharacterHandler(CharacterPool characterPool)
         {
+            _characterPool = characterPool;
         }
         
         public void RemoveCharacter(ICharacter character)
         {
-            
+            _characterPool.Push(character); 
         }
     }
 }

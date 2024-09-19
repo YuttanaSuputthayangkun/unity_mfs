@@ -64,6 +64,14 @@ namespace Characters
                 _last = hero;
             }
 
+            public Hero RemoveFirst()
+            {
+                var first = _heroQueue.Dequeue()!;
+                _heroSet.Remove(first);
+                _first = _heroQueue.TryPeek(out var newFirst) ? newFirst : null; // move new first to first
+                return first;
+            }
+
             public void Rotate(RotateType rotateType)
             {
                 throw new NotImplementedException();

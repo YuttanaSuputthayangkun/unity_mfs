@@ -45,13 +45,16 @@ namespace Characters
             TDefenderType defenderType
         )
         {
-            int damage = attacker.Attack - defender.Defense;
             float multiplier = GetMultiplier(attackerType, defenderType);
-            int finalDamage = Mathf.CeilToInt(damage * multiplier);
+            var attack = Mathf.CeilToInt(attacker.Attack * multiplier);
+            int damage = attack - defender.Defense;
+            damage = Mathf.Clamp(damage, 0, int.MaxValue);
+            
+            Debug.Log($"CalculateDamage ({attacker.Attack}-{defender.Defense}) = {damage}");
 
             return new DamageCalculationResult()
             {
-                Damage = finalDamage,
+                Damage = damage,
             };
         }
 

@@ -68,6 +68,9 @@ public class GameScope : LifetimeScope
                 var pool = container.Resolve<CharacterPool>();
                 if (pool.Pop(CharacterType.Hero) is Hero poolCharacter)
                 {
+                    // TODO: consider moving this process into Dispose or something
+                    poolCharacter.SetCharacterStats(heroData.Stats);
+                    poolCharacter.SetNumber(null);
                     return poolCharacter;
                 }
 
@@ -101,6 +104,8 @@ public class GameScope : LifetimeScope
                 var pool = container.Resolve<CharacterPool>();
                 if (pool.Pop(CharacterType.Enemy) is Enemy poolCharacter)
                 {
+                    // TODO: consider moving this process into Dispose or something
+                    poolCharacter.SetCharacterStats(enemyData.Stats);
                     return poolCharacter;
                 }
 

@@ -55,6 +55,7 @@ namespace Settings
         
         [SerializeField] private HeroType startHeroType = HeroType.Rogue;
         [Range(0, 100)] [SerializeField] private int randomStartHeroSpawnCount;
+        [Range(0, 100)] [SerializeField] private int randomStartEnemySpawnCount = 3;
 
         public IReadOnlyList<CharacterTypeData> CharacterTypeDataList => characterTypeDataList;
 
@@ -69,5 +70,7 @@ namespace Settings
         public HeroType StartHeroType => startHeroType;
         
         public int RandomStartHeroSpawnCount => randomStartHeroSpawnCount;
+        
+        public int RandomStartEnemySpawnCount => randomStartEnemySpawnCount;
     }
 }

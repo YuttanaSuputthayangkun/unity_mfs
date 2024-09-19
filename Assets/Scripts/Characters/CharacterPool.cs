@@ -35,7 +35,7 @@ namespace Characters
             {
                 return null;
             }
-            return queue.Dequeue();
+            return queue.TryDequeue(out var dequeue) ? dequeue : null;
         }
     }
 }

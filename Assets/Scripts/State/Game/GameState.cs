@@ -71,6 +71,7 @@ namespace State.Game
             SetupScene();
             SetupStartHero();
             RandomSpawnStartHeroes();
+            RandomSpawnStartEnemies();
 
             // one loop per action
             while (true)
@@ -165,21 +166,34 @@ namespace State.Game
                 }
                 case Enemy enemy:
                 {
-                    var result = ProcessEnemyCollision(enemy);
+                    var result = ProcessEnemyCollision(_heroRow.GetFirst()!, enemy);
 
                     if (result.IsHeroDead)
                     {
-                        // TODO: remove head here
-                        
-                        _boardManager.RemoveCharacter(enemy.GetBoardCoordinate()!.Value);
-                        enemy.Remove(); // physically remove
+                        var originalHeadCoordinate = _heroRow.GetFirst()!.GetBoardCoordinate()!.Value;
+
+                        var deadHero = _heroRow.RemoveFirst();
+                        _boardManager.RemoveCharacter(deadHero.GetBoardCoordinate()!.Value);
+                        deadHero.Remove(); // physically remove
+
+                        if (_heroRow.HeroCount == 0)
+                        {
+                            return new ProcessCollisionCheckResult() { ShouldContinueGame = false };
+                        }
+
+                        var newHeadCoordinate = _heroRow.GetFirst()!.GetBoardCoordinate()!.Value;
+
+                        // move to replace the previous head
+                        var directionForNewHead =
+                            newHeadCoordinate.TryGetNeighborDirection(originalHeadCoordinate)!.Value;
+                        _heroRow.TryMove(directionForNewHead);
                     }
 
                     if (result.IsEnemyDead)
                     {
                         _boardManager.RemoveCharacter(enemy.GetBoardCoordinate()!.Value);
                         enemy.Remove(); // physically remove
-                        
+
                         SpawnCharacters(CharacterType.Enemy);
                     }
                 }
@@ -212,6 +226,12 @@ namespace State.Game
             var spawnResult = _characterSpawnManager.RandomSpawnStartHeroes();
             Debug.Log($"RandomSpawnStartHeroes spawnResult:\n{spawnResult}");
         }
+        
+        private void RandomSpawnStartEnemies()
+        {
+            var spawnResult = _characterSpawnManager.RandomSpawnStartEnemies();
+            Debug.Log($"RandomSpawnStartEnemies spawnResult:\n{spawnResult}");
+        }
 
         private async UniTask ShowGameOverScreenAsync(CancellationToken cancellationToken)
         {
@@ -230,10 +250,37 @@ namespace State.Game
             UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
         }
 
-        private ProcessEnemyCollisionResult ProcessEnemyCollision(Enemy enemy)
+        private ProcessEnemyCollisionResult ProcessEnemyCollision(Hero hero, Enemy enemy)
         {
-            // TODO: implement this
-            throw new NotImplementedException();
+            int damageToEnemy = _damageCalculator.CalculateDamage(
+                hero,
+                hero.HeroType,
+                enemy,
+                enemy.EnemyType
+            ).Damage;
+
+            int damageToHero = _damageCalculator.CalculateDamage(
+                enemy,
+                enemy.EnemyType,
+                hero,
+                hero.HeroType
+            ).Damage;
+
+            var newHeroStats = new CharacterStats(hero);
+            newHeroStats.health -= damageToHero;
+            Debug.Log($"ProcessEnemyCollision damageToHero({damageToHero}) heroStats({new CharacterStats(hero)}) newHeroStats({newHeroStats})");
+            hero.SetCharacterStats(newHeroStats);
+
+            var newEnemyStats = new CharacterStats(enemy);
+            newEnemyStats.health -= damageToEnemy;
+            Debug.Log($"ProcessEnemyCollision damageToEnemy({damageToEnemy}) enemyStats({new CharacterStats(enemy)}) newEnemyStats({newEnemyStats})");
+            enemy.SetCharacterStats(newEnemyStats);
+
+            return new ProcessEnemyCollisionResult()
+            {
+                IsHeroDead = newHeroStats.health <= 0,
+                IsEnemyDead = newEnemyStats.health <= 0,
+            };
         }
 
         void IDisposable.Dispose()
