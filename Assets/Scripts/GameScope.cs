@@ -35,6 +35,7 @@ public class GameScope : LifetimeScope
         builder.Register<NonPlayerCharacterList>(Lifetime.Singleton);
         builder.Register<MoveCharacterHandler>(Lifetime.Singleton);
         builder.Register<LocateCharacterHandler>(Lifetime.Singleton);
+        builder.Register<CharacterDamageCalculator>(Lifetime.Singleton);
 
         builder.RegisterInstance(gameCamera);
 
@@ -54,6 +55,7 @@ public class GameScope : LifetimeScope
         builder.RegisterInstance(gameSetting.SpawnSetting);
         builder.RegisterInstance(gameSetting.PrefabSetting);
         builder.RegisterInstance(gameSetting.DataSetting);
+        builder.RegisterInstance(gameSetting.DamageCalculationSetting);
 
         // UI
         builder.RegisterInstance(gameGameOverScreenComponent);

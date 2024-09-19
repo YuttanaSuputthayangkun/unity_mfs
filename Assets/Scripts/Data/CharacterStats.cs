@@ -7,6 +7,11 @@ namespace Data
         int Defense { get; }
     }
 
+    public interface ISetCharacterStats
+    {
+        void SetCharacterStats(ICharacterStats characterStats);
+    }
+
     [System.Serializable]
     public struct CharacterStats : ICharacterStats
     {

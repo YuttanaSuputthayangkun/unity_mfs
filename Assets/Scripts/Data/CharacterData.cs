@@ -36,9 +36,14 @@ namespace Data
         {
         }
 
-        public void SetStats(CharacterStats stats)
+        public void SetStats(ICharacterStats stats)
         {
-            this.stats = stats;
+            this.stats = new CharacterStats()
+            {
+                attack = stats.Attack,
+                defense = stats.Defense,
+                health = stats.Health,
+            };
         }
 
         public override string ToString()

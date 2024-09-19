@@ -13,6 +13,7 @@ namespace Characters
         , ISetNumber
         , IContainHeroType
         , ICharacterStats
+        , ISetCharacterStats
     {
         private readonly CharacterComponent _characterComponent;
         private readonly MoveCharacterHandler _moveCharacterHandler;
@@ -44,6 +45,8 @@ namespace Characters
         {
             return $"{_characterComponent.gameObject.name} Data({_heroData}) Number({number})";
         }
+
+        public void SetCharacterStats(ICharacterStats characterStats) => _heroData.SetStats(characterStats);
 
         public MoveResultType TryMove(BoardCoordinate coordinate) => _moveCharacterHandler.TryMove(coordinate, this);
 

@@ -24,6 +24,12 @@ namespace State.Game
             public bool ShouldContinueGame;
         }
 
+        // TODO: remove if not used
+        private struct ProcessEnemyCollisionResult
+        {
+             
+        }
+
         private readonly PlayerInputManager _playerInputManager;
         private readonly BoardManager _boardManager;
         private readonly Camera _camera;
@@ -31,6 +37,7 @@ namespace State.Game
         private readonly CharacterSpawnManager _characterSpawnManager;
         private readonly NonPlayerCharacterList _nonPlayerCharacterList;
         private readonly GameOverScreen _gameOverScreen;
+        private readonly CharacterDamageCalculator _damageCalculator;
 
         public StateType GetStateType() => StateType.GameState;
 
@@ -41,7 +48,8 @@ namespace State.Game
             HeroRow heroRow,
             CharacterSpawnManager characterSpawnManager,
             NonPlayerCharacterList nonPlayerCharacterList, // TODO: consider removing
-            GameOverScreen gameOverScreen
+            GameOverScreen gameOverScreen,
+            CharacterDamageCalculator damageCalculator
         )
         {
             _playerInputManager = playerInputManager;
@@ -51,6 +59,7 @@ namespace State.Game
             _characterSpawnManager = characterSpawnManager;
             _nonPlayerCharacterList = nonPlayerCharacterList;
             _gameOverScreen = gameOverScreen;
+            _damageCalculator = damageCalculator;
         }
 
         UniTask IAsyncStartable.StartAsync(CancellationToken cancellation) => PlayAsync(cancellation);
@@ -150,11 +159,13 @@ namespace State.Game
 
                     _heroRow.AddLast(originalTailCoordinate!, collidedHero);
                     
+                    SpawnCharacters(CharacterType.Hero);
+                    
                     break;
                 }
                 case Enemy enemy:
                     // heaven or hell? let's rock!
-                    ProcessEnemyCollision();
+                    ProcessEnemyCollision(enemy);
                     SpawnCharacters(CharacterType.Enemy);
 
                     // TODO: move
@@ -206,7 +217,7 @@ namespace State.Game
             UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
         }
 
-        private void ProcessEnemyCollision()
+        private void ProcessEnemyCollision(Enemy enemy)
         {
             // TODO: implement this
         }

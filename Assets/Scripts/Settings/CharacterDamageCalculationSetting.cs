@@ -21,23 +21,23 @@ namespace Settings
         }
 
         [System.Serializable]
-        public class HeroToMonsterMultiplierData : CharacterDamageMultiplierData<HeroType, EnemyType>
+        public class HeroToEnemyMultiplierData : CharacterDamageMultiplierData<HeroType, EnemyType>
         {
         }
 
         [System.Serializable]
-        public class MonsterToHeroMultiplierData : CharacterDamageMultiplierData<EnemyType, HeroType>
+        public class EnemyToHeroMultiplierData : CharacterDamageMultiplierData<EnemyType, HeroType>
         {
         }
 
-        [SerializeField] private HeroToMonsterMultiplierData[] heroToMonsterMultiplierDataList = null!;
+        [SerializeField] private HeroToEnemyMultiplierData[] heroToEnemyMultiplierDataList = null!;
 
-        [SerializeField] private MonsterToHeroMultiplierData[] monsterToHeroMultiplierDataList = null!;
+        [SerializeField] private EnemyToHeroMultiplierData[] enemyToHeroMultiplierDataList = null!;
 
-        public IReadOnlyList<HeroToMonsterMultiplierData> HeroToMonsterMultiplierDataList =>
-            heroToMonsterMultiplierDataList;
+        public IReadOnlyList<HeroToEnemyMultiplierData> HeroToEnemyMultiplierDataList =>
+            heroToEnemyMultiplierDataList;
 
-        public IReadOnlyList<MonsterToHeroMultiplierData> MonsterToHeroMultiplierDataList =>
-            monsterToHeroMultiplierDataList;
+        public IReadOnlyList<EnemyToHeroMultiplierData> EnemyToHeroMultiplierDataList =>
+            enemyToHeroMultiplierDataList;
     }
 }

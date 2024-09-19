@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 #nullable enable
 
@@ -11,6 +12,7 @@ namespace Settings
         [SerializeField] private CharacterSpawnSetting characterSpawnSetting = null!;
         [SerializeField] private CharacterPrefabSetting characterPrefabSetting = null!;
         [SerializeField] private CharacterDataSetting characterDataSetting = null!;
+        [SerializeField] private CharacterDamageCalculationSetting damageCalculationSetting = null!;
 
         public BoardSetting BoardSetting => boardSetting;
 
@@ -19,5 +21,7 @@ namespace Settings
         public CharacterPrefabSetting PrefabSetting => characterPrefabSetting;
 
         public CharacterDataSetting DataSetting => characterDataSetting;
+
+        public CharacterDamageCalculationSetting DamageCalculationSetting => damageCalculationSetting;
     }
 }
