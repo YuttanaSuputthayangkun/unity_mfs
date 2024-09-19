@@ -15,23 +15,33 @@ MonoBehaviour:
   heroDataList:
   - characterType: 0
     stats:
-      health: 5
+      health: 2
       attack: 5
       defense: 5
   - characterType: 1
     stats:
-      health: 5
+      health: 2
       attack: 5
       defense: 5
   - characterType: 2
     stats:
       health: 5
-      attack: 5
+      attack: 2
       defense: 5
   enemyDataList:
   - characterType: 0
     stats:
       health: 2
+      attack: 5
+      defense: 5
+  - characterType: 1
+    stats:
+      health: 2
+      attack: 5
+      defense: 5
+  - characterType: 2
+    stats:
+      health: 5
       attack: 2
-      defense: 2
+      defense: 5
   obstacleDataList: []

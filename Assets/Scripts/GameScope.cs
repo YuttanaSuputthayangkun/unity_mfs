@@ -93,6 +93,34 @@ public class GameScope : LifetimeScope
                 return newHero;
             };
         }, Lifetime.Transient);
+
+        builder.RegisterFactory<IReadOnlyCharacterData<EnemyType>, Enemy>(container =>
+        {
+            return enemyData =>
+            {
+                var pool = container.Resolve<CharacterPool>();
+                if (pool.Pop(CharacterType.Enemy) is Enemy poolCharacter)
+                {
+                    return poolCharacter;
+                }
+
+                var enemyPrefabData =
+                    gameSetting.PrefabSetting.EnemyPrefabDataList.First(x => x.PrefabType == enemyData.Type)
+                    ?? throw new NotSupportedException("Cannot find enemy prefab with type: {type}");
+                var instantiated = container.Instantiate(enemyPrefabData.Prefab);
+                var moveHandler = container.Resolve<MoveCharacterHandler>();
+                var locateCharacterHandler = container.Resolve<LocateCharacterHandler>();
+                var removeCharacterHandler = container.Resolve<RemoveCharacterHandler>();
+                var enemy = new Enemy(
+                    instantiated.GetComponent<CharacterComponent>(),
+                    enemyData,
+                    moveHandler,
+                    removeCharacterHandler,
+                    locateCharacterHandler
+                );
+                return enemy;
+            };
+        }, Lifetime.Transient);
     }
 
     private void Start()

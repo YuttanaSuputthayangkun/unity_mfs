@@ -24,10 +24,10 @@ namespace State.Game
             public bool ShouldContinueGame;
         }
 
-        // TODO: remove if not used
         private struct ProcessEnemyCollisionResult
         {
-             
+            public bool IsHeroDead;
+            public bool IsEnemyDead;
         }
 
         private readonly PlayerInputManager _playerInputManager;
@@ -158,18 +158,31 @@ namespace State.Game
                     Debug.Log($"{nameof(GameState)} moveResultType({moveResultType})");
 
                     _heroRow.AddLast(originalTailCoordinate!, collidedHero);
-                    
+
                     SpawnCharacters(CharacterType.Hero);
-                    
+
                     break;
                 }
                 case Enemy enemy:
-                    // heaven or hell? let's rock!
-                    ProcessEnemyCollision(enemy);
-                    SpawnCharacters(CharacterType.Enemy);
+                {
+                    var result = ProcessEnemyCollision(enemy);
 
-                    // TODO: move
+                    if (result.IsHeroDead)
+                    {
+                        // TODO: remove head here
+                        
+                        _boardManager.RemoveCharacter(enemy.GetBoardCoordinate()!.Value);
+                        enemy.Remove(); // physically remove
+                    }
 
+                    if (result.IsEnemyDead)
+                    {
+                        _boardManager.RemoveCharacter(enemy.GetBoardCoordinate()!.Value);
+                        enemy.Remove(); // physically remove
+                        
+                        SpawnCharacters(CharacterType.Enemy);
+                    }
+                }
                     break;
                 case Obstacle obstacle:
                     // do nothing, I guess
@@ -217,9 +230,10 @@ namespace State.Game
             UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
         }
 
-        private void ProcessEnemyCollision(Enemy enemy)
+        private ProcessEnemyCollisionResult ProcessEnemyCollision(Enemy enemy)
         {
             // TODO: implement this
+            throw new NotImplementedException();
         }
 
         void IDisposable.Dispose()

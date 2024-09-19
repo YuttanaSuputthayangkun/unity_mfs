@@ -15,6 +15,8 @@ MonoBehaviour:
   characterTypeDataList:
   - characterType: 0
     weight: 1
+  - characterType: 1
+    weight: 1
   heroTypeDataList:
   - heroType: 0
     weight: 1
@@ -22,10 +24,20 @@ MonoBehaviour:
     weight: 1
   - heroType: 2
     weight: 1
-  enemyTypeDataList: []
+  enemyTypeDataList:
+  - enemyType: 0
+    weight: 1
+  - enemyType: 1
+    weight: 1
+  - enemyType: 2
+    weight: 1
   _obstacleTypeDataList: []
   characterCountDataList:
   - Count: 3
     weight: 1
+  - Count: 1
+    weight: 4
+  - Count: 2
+    weight: 2
   startHeroType: 0
   randomStartHeroSpawnCount: 5

@@ -126,6 +126,13 @@ namespace Characters
             return true;
         }
 
+        public Hero RemoveFirst()
+        {
+            
+            
+            throw new NotImplementedException();
+        }
+
         public MoveResultType TryMove(Direction direction)
         {
             // check from head if the direction is movable 

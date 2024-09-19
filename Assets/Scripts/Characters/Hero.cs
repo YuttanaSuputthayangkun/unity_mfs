@@ -39,6 +39,8 @@ namespace Characters
             _removeCharacterHandler = removeCharacterHandler;
             _isPlayerCharacter = isPlayerCharacter;
             _heroData = new HeroData(readOnlyCharacterData);
+            
+            SetCharacterStats(this);
         }
 
         public override string ToString()
@@ -46,16 +48,20 @@ namespace Characters
             return $"{_characterComponent.gameObject.name} Data({_heroData}) Number({number})";
         }
 
-        public void SetCharacterStats(ICharacterStats characterStats) => _heroData.SetStats(characterStats);
+        public void SetCharacterStats(ICharacterStats characterStats)
+        {
+            _heroData.SetStats(characterStats);
+            _characterComponent.SetStats(characterStats);
+        }
 
         public MoveResultType TryMove(BoardCoordinate coordinate) => _moveCharacterHandler.TryMove(coordinate, this);
 
         public HeroType HeroType => _heroData.Type;
-        
+
         public int Health => _heroData.Stats.health;
         public int Attack => _heroData.Stats.attack;
         public int Defense => _heroData.Stats.defense;
-        
+
         public void Remove() => _removeCharacterHandler.RemoveCharacter(this);
 
         public bool IsPlayerCharacter() => _isPlayerCharacter.Invoke(this);
@@ -68,14 +74,8 @@ namespace Characters
 
         public CharacterType GetCharacterType() => CharacterType.Hero;
 
-        public BoardCoordinate? GetBoardCoordinate()
-        {
-            return _locateCharacterHandler.LocateCharacter(this);
-        }
+        public BoardCoordinate? GetBoardCoordinate() => _locateCharacterHandler.LocateCharacter(this);
 
-        public void SetWorldPosition(Vector3 worldPosition)
-        {
-            _characterComponent.transform.position = worldPosition;
-        }
+        public void SetWorldPosition(Vector3 worldPosition) => _characterComponent.transform.position = worldPosition;
     }
 }

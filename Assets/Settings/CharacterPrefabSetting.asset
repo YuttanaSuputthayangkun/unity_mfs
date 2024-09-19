@@ -21,6 +21,10 @@ MonoBehaviour:
     prefab: {fileID: 6520552930564917913, guid: 9f0768c5070a085488f7d5b2564f5251, type: 3}
   enemyPrefabDataList:
   - prefabType: 0
+    prefab: {fileID: 542342183893618889, guid: 67b4a70c71ec14f40bbd0b95dbb23826, type: 3}
+  - prefabType: 1
+    prefab: {fileID: 542342183893618889, guid: 8ae2f81f836d7224f9e9fb6dde78e884, type: 3}
+  - prefabType: 2
     prefab: {fileID: 542342183893618889, guid: 3180e66cd0ee40e47aae14404f539072, type: 3}
   obstaclePrefabDataList:
   - prefabType: 0
