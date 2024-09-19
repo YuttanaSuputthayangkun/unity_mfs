@@ -76,6 +76,10 @@ namespace Characters
 
         public BoardCoordinate? GetBoardCoordinate() => _locateCharacterHandler.LocateCharacter(this);
 
-        public void SetWorldPosition(Vector3 worldPosition) => _characterComponent.transform.position = worldPosition;
+        public void SetWorldPosition(Vector3 worldPosition)
+        {
+            worldPosition.z -= 1; // to put the character above the board
+            _characterComponent.transform.position = worldPosition;
+        }
     }
 }

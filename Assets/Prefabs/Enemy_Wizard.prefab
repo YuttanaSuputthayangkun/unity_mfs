@@ -16,6 +16,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enemy_Wizard
       objectReference: {fileID: 0}
+    - target: {fileID: 6248328707998291656, guid: 54cf3b27bd5fc4c4eb411b7997c3357b, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 183f6970e1d643249a0aff8b31f725f1, type: 3}
     - target: {fileID: 6413886185591714439, guid: 54cf3b27bd5fc4c4eb411b7997c3357b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

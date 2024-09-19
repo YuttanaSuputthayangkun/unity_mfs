@@ -63,6 +63,7 @@ namespace Characters
 
         public void SetWorldPosition(Vector3 worldPosition)
         {
+            worldPosition.z -= 1; // to put the character above the board
             _characterComponent.transform.position = worldPosition;
         }
 

@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Hero_Wizard
       objectReference: {fileID: 0}
+    - target: {fileID: 6248328707998291656, guid: e2edc4f86013c2840aeb9bd29a4f9eac, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 183f6970e1d643249a0aff8b31f725f1, type: 3}
     - target: {fileID: 6413886185591714439, guid: e2edc4f86013c2840aeb9bd29a4f9eac, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
