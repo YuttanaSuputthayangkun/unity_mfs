@@ -36,6 +36,11 @@ namespace Data
         {
         }
 
+        public void SetStats(CharacterStats stats)
+        {
+            this.stats = stats;
+        }
+
         public override string ToString()
         {
             return $"Type({characterType}) Stat({stats})";

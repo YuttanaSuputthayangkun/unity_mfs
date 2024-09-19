@@ -7,11 +7,13 @@ namespace Characters
     public class Enemy :
         ICharacter
         , ISetNumber
+        , IContainEnemyType
+        , ICharacterStats
     {
         private readonly CharacterComponent _characterComponent;
-        private readonly IReadOnlyCharacterData<EnemyType> _readOnlyCharacterData;
         private readonly MoveCharacterHandler _moveCharacterHandler;
         private readonly RemoveCharacterHandler _removeCharacterHandler;
+        private readonly EnemyData _enemyData;
 
         public Enemy(
             CharacterComponent characterComponent,
@@ -21,21 +23,27 @@ namespace Characters
         )
         {
             _characterComponent = characterComponent;
-            _readOnlyCharacterData = readOnlyCharacterData;
+            _enemyData = new EnemyData(readOnlyCharacterData);
             _moveCharacterHandler = moveCharacterHandler;
             _removeCharacterHandler = removeCharacterHandler;
         }
 
         public override string ToString()
         {
-            return $"{_characterComponent.gameObject.name} Data({_readOnlyCharacterData})";
+            return $"{_characterComponent.gameObject.name} Data({_enemyData})";
         }
 
         public void SetNumber(int? number) => _characterComponent.SetNumber(number);
 
         public CharacterType GetCharacterType() => CharacterType.Enemy;
 
+        public EnemyType EnemyType => _enemyData.Type;
+
         public bool IsPlayerCharacter() => false;
+
+        public int Health => _enemyData.Stats.health;
+        public int Attack => _enemyData.Stats.attack;
+        public int Defense => _enemyData.Stats.defense;
 
         public MoveResultType TryMove(BoardCoordinate coordinate) => _moveCharacterHandler.TryMove(coordinate, this);
 

@@ -11,6 +11,8 @@ namespace Characters
     public class Hero :
         ICharacter
         , ISetNumber
+        , IContainHeroType
+        , ICharacterStats
     {
         private readonly CharacterComponent _characterComponent;
         private readonly MoveCharacterHandler _moveCharacterHandler;
@@ -27,7 +29,7 @@ namespace Characters
             MoveCharacterHandler moveCharacterHandler,
             LocateCharacterHandler locateCharacterHandler,
             RemoveCharacterHandler removeCharacterHandler,
-            Func<ICharacter,bool> isPlayerCharacter
+            Func<ICharacter, bool> isPlayerCharacter
         )
         {
             _characterComponent = characterComponent;
@@ -44,6 +46,13 @@ namespace Characters
         }
 
         public MoveResultType TryMove(BoardCoordinate coordinate) => _moveCharacterHandler.TryMove(coordinate, this);
+
+        public HeroType HeroType => _heroData.Type;
+        
+        public int Health => _heroData.Stats.health;
+        public int Attack => _heroData.Stats.attack;
+        public int Defense => _heroData.Stats.defense;
+        
         public void Remove() => _removeCharacterHandler.RemoveCharacter(this);
 
         public bool IsPlayerCharacter() => _isPlayerCharacter.Invoke(this);

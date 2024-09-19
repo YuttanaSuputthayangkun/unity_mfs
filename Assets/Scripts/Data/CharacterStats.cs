@@ -1,7 +1,14 @@
 namespace Data
 {
+    public interface ICharacterStats
+    {
+        int Health { get; }
+        int Attack { get; }
+        int Defense { get; }
+    }
+
     [System.Serializable]
-    public struct CharacterStats
+    public struct CharacterStats : ICharacterStats
     {
         public int health;
         public int attack;
@@ -11,5 +18,9 @@ namespace Data
         {
             return $"H({health}) A({attack}) D({defense})";
         }
+
+        public int Health => health;
+        public int Attack => attack;
+        public int Defense => defense;
     }
 }
