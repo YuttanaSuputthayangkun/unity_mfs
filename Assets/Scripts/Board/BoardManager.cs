@@ -155,7 +155,13 @@ namespace Board
         {
             ThrowIfNotSetup();
 
-            return _emptyCellCoordinateList!.Take(count).Select(GetCell);
+            foreach (var _ in Enumerable.Range(0, count))
+            {
+                var sampleCoordinate = _emptyCellCoordinateList!.Take(10).ToArray();
+                var randomCoordinate = sampleCoordinate.RandomPickStruct();
+                if (randomCoordinate is not null)
+                    yield return GetCell(randomCoordinate.Value);
+            }
         }
 
         public PlaceCharacterResult PlaceCharacter(BoardCoordinate boardCoordinate, ICharacter character)

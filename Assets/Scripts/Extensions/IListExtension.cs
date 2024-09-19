@@ -19,17 +19,6 @@ namespace Extensions
             return list[randomIndex];
         }
 
-        public static T? RandomPickStruct<T>(this IList<T> list) where T : struct
-        {
-            if (list.Count == 0)
-            {
-                return null;
-            }
-
-            int randomIndex = Random.Range(0, list.Count - 1);
-            return list[randomIndex];
-        }
-
         public static void Shuffle<T>(this IList<T> list)
         {
             if (list.Count == 0)
