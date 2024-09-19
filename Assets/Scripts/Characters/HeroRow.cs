@@ -128,7 +128,16 @@ namespace Characters
 
         public Hero RemoveFirst()
         {
-            return _heroList.RemoveFirst();
+            var removed = _heroList.RemoveFirst();
+
+            // re-assign numbers
+            var list = _heroList.RowHeroDataList.Select((h, i) => (h, i));
+            foreach (var (h, i) in list)
+            {
+                h.SetNumber(i + 1);
+            }
+
+            return removed;
         }
 
         public MoveResultType TryMove(Direction direction)
